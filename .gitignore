@@ -1,0 +1,19 @@
+# 1. ルート用の .gitignore 作成
+cat << EOF > .gitignore
+# ログとOSファイル
+*.log
+.DS_Store
+
+# Python (バックエンド)
+.venv/
+__pycache__/
+*.pyc
+
+# 開発環境・機密情報
+.env
+.env.local
+
+# エディタ設定
+.vscode/
+.idea/
+EOF
