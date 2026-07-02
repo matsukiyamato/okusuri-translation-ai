@@ -193,3 +193,7 @@ okusuri-translation-ai/
             └── sign_service.py
 
 ```
+### 開発途中での実行コマンド
+```text
+npx expo start --tunnel
+```
