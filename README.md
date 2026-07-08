@@ -292,6 +292,75 @@ okusuri-translation-ai/
 ```
 ---
 
+### 9. 使用API
+- Gemini 2.5 Flash：Google GenAI SDK Python
+- Model Context Protocol：Model Context Protocol Specification / FastMCP Python
+- Google Cloud Vision (OCR)：Google Cloud Vision API Python client
+- Google Cloud STT / TTS：Google Cloud Speech to Text Python / Google Cloud Text to Speech Python 
+- Vector DB / RAG：ChromaDB / LangChain Vectorstores Chroma
+- セキュリティ・暗号化(Argon2id)
+
+### 10. バックエンド（FastAPI / Python）ライブラリインストールコマンド
+バックエンド環境（backend/）のターミナルで実行するコマンドです。2026年現在推奨されている最新の統合SDK（google-genai）およびMCP公式ライブラリを含んでいます。
+```bash
+# 1. FastAPI 基本・Webサーバー・厳格な型定義
+pip install fastapi uvicorn pydantic
+
+# 2. Google系API（Gemini 2.5 / OCR / Speech-to-Text / Text-to-Speech）
+# ※2026年現在、Geminiは従来のgoogle-generativeaiから新しいgoogle-genai SDKへの移行が推奨されています
+pip install google-genai google-cloud-vision google-cloud-speech google-cloud-texttospeech
+
+# 3. Model Context Protocol (MCP) 連携クライアント
+pip install mcp fastmcp
+
+# 4. RAG・ベクトルデータベース構築
+pip install langchain langchain-community chromadb
+
+# 5. データベース接続（MySQL）
+pip install mysql-connector-python
+
+# 6. セキュリティ（Argon2idハッシュ、AES-256-GCM暗号化、JWTトークン分離）
+pip install argon2-cffi cryptography pyjwt
+
+# （オプション）環境変数管理用
+pip install python-dotenv
+```
+### 11. フロントエンド（React Native / Expo）ライブラリインストールコマンド
+フロントエンド環境（frontend/）のターミナルで実行するコマンドです。Expo SDK 56環境を想定し、カメラや音声、アクセシビリティに必要なモジュールを網羅しています。
+```bash
+# 1. カメラ機能・画像選択（薬剤説明書の撮影、OCR連携用）
+npx expo install expo-camera expo-image-picker
+
+# 2. 音声再生・手話動画再生（TTS読み上げ、手話動画ストリーミング用）
+npx expo install expo-av
+
+# 3. 画面遷移（マルチ画面・ステート管理・認証フローの分岐制御）
+npm install @react-navigation/native @react-navigation/stack
+npx expo install react-native-screens react-native-safe-area-context
+
+# 4. セキュリティ（セッションJWT等のセキュアストレージ保存用）
+npx expo install expo-secure-store
+
+# 5. TypeScript 型定義（開発環境用）
+npm install --save-dev @types/react @types/react-native
+```
+
+### 12. 使用外部API・プロトコル一覧
+本システムが連携する外部API、プロトコル、およびSDKの一覧である。2026年現在のモダンな統合開発基準に準拠し、APIキーのサーバー管理およびセキュアなエンドポイント通信を行う。
+
+| API / プロトコル名 | 主な用途・システム内での役割 | 公式ドキュメント / リファレンスURL | 
+| --- | --- | --- |
+| Google GenAI API | OCRテキストのJSON構造化（response_schema強制） | https://ai.google.dev/gemini-api/docs | 
+| Gemini 2.5 Flash | 医療データを基にした「やさしい日本語」への変換・生成。 | https://ai.google.dev/gemini-api/docs | 
+| Google Cloud Vision API | ユーザーが撮影した薬剤情報提供書・添付文書の画像から生テキスト（Raw Text）を抽出するOCR処理。 | https://cloud.google.com/vision/docs |
+| Google Cloud Text-to-Speech API | 医療ポリシーフィルタおよびRAGを通過した、公的出典が保証された安全な「やさしい日本語」を音声ストリームへ合成。 | https://cloud.google.com/text-to-speech/docs |       
+| Google Cloud Speech-to-Text API | 音声モード選択時における、ユーザーからの追加質問（フリーテキスト入力）の音声文字起こし処理。 | https://cloud.google.com/speech-to-text/docs |
+| Model Context Protocol (MCP) | 外部の公的医療情報源（PMDA等）のデータベースへ安全かつ標準化された手続きでセキュアにアクセスするための通信プロトコル。 | https://modelcontextprotocol.io/introduction |
+| Google OAuth 2.0 API | 2フェーズユーザー登録における、初回認証セッション起動およびEmailアドレスの安全な取得。 | https://developers.google.com/identity/protocols/oauth2 |
+
+---
+
+
 ### 開発途中での実行コマンド
 ```text
 npx expo start --tunnel
