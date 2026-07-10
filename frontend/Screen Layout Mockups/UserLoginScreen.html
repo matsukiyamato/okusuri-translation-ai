@@ -1,0 +1,219 @@
+<!DOCTYPE html><html class="light" lang="ja" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#005e53",
+                    "tertiary": "#465655",
+                    "surface": "#f6fafa",
+                    "background": "#f6fafa",
+                    "secondary-container": "#acedda",
+                    "surface-container": "#ebefef",
+                    "inverse-surface": "#2c3132",
+                    "on-primary": "#ffffff",
+                    "secondary": "#29695b",
+                    "inverse-on-surface": "#edf1f1",
+                    "on-error": "#ffffff",
+                    "primary-fixed": "#97f3e2",
+                    "tertiary-fixed": "#d4e6e5",
+                    "error": "#ba1a1a",
+                    "on-background": "#181c1d",
+                    "on-primary-fixed-variant": "#005047",
+                    "primary-fixed-dim": "#7ad7c6",
+                    "surface-variant": "#dfe3e3",
+                    "on-primary-fixed": "#00201b",
+                    "on-tertiary-fixed": "#0e1e1e",
+                    "outline-variant": "#bdc9c5",
+                    "tertiary-container": "#5d6e6e",
+                    "on-secondary-fixed": "#00201a",
+                    "on-surface": "#181c1d",
+                    "on-surface-variant": "#3e4946",
+                    "secondary-fixed": "#afefdd",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-primary": "#7ad7c6",
+                    "surface-dim": "#d7dbdb",
+                    "on-tertiary-container": "#def0ef",
+                    "on-secondary-container": "#2e6d5f",
+                    "surface-container-high": "#e5e9e9",
+                    "surface-container-low": "#f0f4f4",
+                    "secondary-fixed-dim": "#94d3c1",
+                    "outline": "#6e7a76",
+                    "on-error-container": "#93000a",
+                    "on-tertiary-fixed-variant": "#3a4a49",
+                    "error-container": "#ffdad6",
+                    "on-secondary-fixed-variant": "#065043",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-container": "#a1feec",
+                    "surface-container-highest": "#dfe3e3",
+                    "surface-bright": "#f6fafa",
+                    "tertiary-fixed-dim": "#b8cac9",
+                    "primary-container": "#00796b",
+                    "surface-tint": "#006b5e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "touch-target-critical": "56px",
+                    "section-gap": "24px",
+                    "element-gap": "8px",
+                    "gutter": "16px",
+                    "touch-target-min": "48px",
+                    "margin-mobile": "20px",
+                    "margin-tablet": "32px"
+            },
+            "fontFamily": {
+                    "label-lg": ["Atkinson Hyperlegible Next"],
+                    "headline-md": ["Atkinson Hyperlegible Next"],
+                    "body-lg": ["Atkinson Hyperlegible Next"],
+                    "headline-lg-mobile": ["Atkinson Hyperlegible Next"],
+                    "label-md": ["Atkinson Hyperlegible Next"],
+                    "body-md": ["Atkinson Hyperlegible Next"],
+                    "headline-lg": ["Atkinson Hyperlegible Next"]
+            },
+            "fontSize": {
+                    "label-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "0.1px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-lg": ["20px", {"lineHeight": "30px", "letterSpacing": "0.5px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "body-md": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "0.25px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Atkinson Hyperlegible Next', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(209, 219, 219, 0.5);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col items-center justify-center overflow-x-hidden">
+<!-- Atmospheric Background Element -->
+<div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+<div class="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] rounded-full bg-secondary-container opacity-20 blur-[120px]"></div>
+<div class="absolute top-[40%] -right-[15%] w-[70%] h-[70%] rounded-full bg-primary-fixed-dim opacity-15 blur-[150px]"></div>
+</div>
+<!-- Main Content Canvas -->
+<main class="relative z-10 w-full max-w-md px-margin-mobile flex flex-col items-center gap-section-gap py-12">
+<!-- Header Branding (Suppressed Nav Shell as per transactional rule) -->
+<div class="w-full text-center mb-4">
+<div class="flex items-center justify-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary text-[40px]" style="font-variation-settings: &quot;FILL&quot; 1;">medical_services</span>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight">お薬翻訳AI</h1>
+</div>
+<p class="font-body-md text-on-surface-variant max-w-[280px] mx-auto">正確な医療情報を、あなたの言語で。安全な医療体験を提供します。</p>
+</div>
+<!-- Login Card -->
+<div class="w-full glass-panel rounded-xl shadow-sm p-gutter flex flex-col gap-6">
+<h2 class="font-headline-md text-headline-md text-on-surface">ログイン</h2>
+<form class="flex flex-col gap-5" onsubmit="event.preventDefault();">
+<!-- Email Field -->
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-on-surface-variant ml-1" for="email">メールアドレス</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-outline">mail</span>
+<input class="w-full h-touch-target-critical pl-12 pr-4 bg-surface-container-low border-b-2 border-outline rounded-t-lg focus:border-primary focus:ring-0 transition-all font-body-md text-on-surface placeholder:text-outline-variant" id="email" placeholder="メールアドレス" type="email">
+</div>
+</div>
+<!-- Password Field -->
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-on-surface-variant ml-1" for="password">パスワード</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-outline">lock</span>
+<input class="w-full h-touch-target-critical pl-12 pr-12 bg-surface-container-low border-b-2 border-outline rounded-t-lg focus:border-primary focus:ring-0 transition-all font-body-md text-on-surface placeholder:text-outline-variant" id="password" placeholder="パスワード" type="password">
+<button class="absolute right-2 w-touch-target-min h-touch-target-min flex items-center justify-center text-outline-variant hover:text-primary transition-colors" onclick="togglePassword()" type="button">
+<span class="material-symbols-outlined" id="password-toggle-icon">visibility</span>
+</button>
+</div>
+<div class="text-right">
+<a class="font-label-md text-secondary hover:underline" href="#">パスワードを忘れた場合</a>
+</div>
+</div>
+<!-- Primary Action -->
+<button class="mt-2 w-full h-touch-target-critical bg-primary text-on-primary rounded-full font-label-lg text-label-lg shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">login</span>
+<span class="">ログインする</span>
+</button>
+</form>
+<!-- Divider -->
+<div class="flex items-center gap-4 py-2">
+<div class="h-[1px] flex-1 bg-outline-variant"></div>
+<span class="font-label-md text-outline">または</span>
+<div class="h-[1px] flex-1 bg-outline-variant"></div>
+</div>
+<!-- Social Action -->
+<button class="w-full h-touch-target-critical bg-surface-container-lowest border border-outline-variant rounded-full flex items-center justify-center gap-3 active:bg-surface-variant transition-all font-label-lg text-label-lg text-on-surface"><img alt="Google" class="w-6 h-6" src="https://www.gstatic.com/images/branding/product/2x/googleg_48dp.png"><span class="">Googleアカウントでログイン</span></button>
+</div>
+<!-- Footer Navigation -->
+<div class="flex flex-col items-center gap-4 mt-4">
+<a class="font-label-lg text-label-lg text-secondary hover:text-primary underline underline-offset-4 transition-colors" href="#">
+                新しくアカウントを作る（新規登録画面へ）
+            </a>
+<div class="w-full h-16 rounded-xl bg-surface-container-low p-4 flex items-center justify-center gap-3">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: &quot;FILL&quot; 1;">security</span>
+<p class="font-label-md text-on-surface-variant">あなたのデータは医療レベルの暗号化で保護されます</p>
+</div>
+</div>
+<!-- Abstract Decorative Illustration Area -->
+<div class="mt-8 w-full h-48 rounded-2xl overflow-hidden relative shadow-sm border border-outline-variant">
+<div class="w-full h-full bg-cover bg-center" data-alt="A clinical yet warm medical illustration of a generic medication bottle and a smartphone displaying a glowing translation wave. The style is modern corporate flat art with high contrast using the teal and white palette. The lighting is soft and bright, suggesting a safe, professional pharmaceutical environment with abstract molecular shapes floating in the background." style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuDxnNW2uzIRuk67FMdjJEHq9NihoYzDHEA8no-NwFjF0mh77mk2a6d_mOJRB7eRLq-vyPmxHf-HsZFK9ipWSt0hMJisTGlFb4YVWbiThDFoiliQCvssWSQuCPoCzeGd3Qf1DICVTZHNGn40YJptq2zO1HPNLkJlp1OxyMMeyPJaJBlQGeX1j-Yg8pWbpGL_DkykzdG48liAKZQBxw-6UP0PxWuiKmPoGtv-YnzrszQmkGMOdb_Duo6c&quot;);"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent"></div>
+</div>
+</main>
+<script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('password-toggle-icon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.textContent = 'visibility_off';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.textContent = 'visibility';
+            }
+        }
+
+        // Add subtle focus animation for inputs
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.parentElement.classList.add('scale-[1.01]');
+                input.parentElement.parentElement.style.transition = 'all 0.2s ease-out';
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.parentElement.classList.remove('scale-[1.01]');
+            });
+        });
+    </script>
+
+
+</body></html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ja"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>スキャン内容確認 - お薬翻訳AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "primary": "#005e53",
+                "tertiary": "#465655",
+                "surface": "#f6fafa",
+                "background": "#f6fafa",
+                "secondary-container": "#acedda",
+                "surface-container": "#ebefef",
+                "inverse-surface": "#2c3132",
+                "on-primary": "#ffffff",
+                "secondary": "#29695b",
+                "inverse-on-surface": "#edf1f1",
+                "on-error": "#ffffff",
+                "primary-fixed": "#97f3e2",
+                "tertiary-fixed": "#d4e6e5",
+                "error": "#ba1a1a",
+                "on-background": "#181c1d",
+                "on-primary-fixed-variant": "#005047",
+                "primary-fixed-dim": "#7ad7c6",
+                "surface-variant": "#dfe3e3",
+                "on-primary-fixed": "#00201b",
+                "on-tertiary-fixed": "#0e1e1e",
+                "outline-variant": "#bdc9c5",
+                "tertiary-container": "#5d6e6e",
+                "on-secondary-fixed": "#00201a",
+                "on-surface": "#181c1d",
+                "on-surface-variant": "#3e4946",
+                "secondary-fixed": "#afefdd",
+                "surface-container-lowest": "#ffffff",
+                "inverse-primary": "#7ad7c6",
+                "surface-dim": "#d7dbdb",
+                "on-tertiary-container": "#def0ef",
+                "on-secondary-container": "#2e6d5f",
+                "surface-container-high": "#e5e9e9",
+                "surface-container-low": "#f0f4f4",
+                "secondary-fixed-dim": "#94d3c1",
+                "outline": "#6e7a76",
+                "on-error-container": "#93000a",
+                "on-tertiary-fixed-variant": "#3a4a49",
+                "error-container": "#ffdad6",
+                "on-secondary-fixed-variant": "#065043",
+                "on-secondary": "#ffffff",
+                "on-tertiary": "#ffffff",
+                "on-primary-container": "#a1feec",
+                "surface-container-highest": "#dfe3e3",
+                "surface-bright": "#f6fafa",
+                "tertiary-fixed-dim": "#b8cac9",
+                "primary-container": "#00796b",
+                "surface-tint": "#006b5e"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "touch-target-critical": "56px",
+                "section-gap": "24px",
+                "element-gap": "8px",
+                "gutter": "16px",
+                "touch-target-min": "48px",
+                "margin-mobile": "20px",
+                "margin-tablet": "32px"
+            },
+            "fontFamily": {
+                "label-lg": ["Atkinson Hyperlegible Next"],
+                "headline-md": ["Atkinson Hyperlegible Next"],
+                "body-lg": ["Atkinson Hyperlegible Next"],
+                "headline-lg-mobile": ["Atkinson Hyperlegible Next"],
+                "label-md": ["Atkinson Hyperlegible Next"],
+                "body-md": ["Atkinson Hyperlegible Next"],
+                "headline-lg": ["Atkinson Hyperlegible Next"]
+            },
+            "fontSize": {
+                "label-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "0.1px", "fontWeight": "600"}],
+                "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                "body-lg": ["20px", {"lineHeight": "30px", "letterSpacing": "0.5px", "fontWeight": "400"}],
+                "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                "body-md": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "0.25px", "fontWeight": "700"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            background-color: #f6fafa;
+            font-family: 'Atkinson Hyperlegible Next', sans-serif;
+            overflow: hidden;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f0f4f4;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #bdc9c5;
+            border-radius: 2px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .focus-ring:focus-within {
+            outline: 3px solid #29695b;
+            outline-offset: 2px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface shadow-sm flex items-center justify-between px-margin-mobile h-touch-target-critical w-full">
+<button class="w-touch-target-min h-touch-target-min flex items-center justify-center hover:bg-surface-variant transition-colors active:scale-95 duration-100 rounded-full">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<h1 class="text-headline-md font-headline-md font-bold text-primary">内容の確認</h1>
+<button class="w-touch-target-min h-touch-target-min flex items-center justify-center hover:bg-surface-variant transition-colors active:scale-95 duration-100 rounded-full">
+<span class="material-symbols-outlined text-primary">help</span>
+</button>
+</header>
+<main class="flex-grow flex flex-col pt-touch-target-critical pb-[100px]">
+<!-- Top Component (35% height): Static Preview -->
+<section class="h-[309px] w-full relative overflow-hidden bg-on-background">
+<div class="absolute inset-0 opacity-80" data-alt="A high-resolution, close-up photograph of a medical prescription paper with Japanese text. The lighting is bright and even, highlighting the texture of the paper and the sharp black ink of the characters. The composition is a top-down crop showing specific medicine names. The overall aesthetic is professional, clean, and clinical, using a soft teal and white color palette for consistency with the medical UI." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBB7dIOwyB-Gugc-tC0cwL3WVQBGeJ7dSZ9EdUs3xDdLupWlzII_SMwGTlJBNeQdGZPu6FQsEl2oNdbhR-UHIutPMO8maPLiHOJdx3CehpoNYRKOyIbpWZ2AvXX4hPLRI5z49EgNGi07cqoUxM9MlSNsvhqaEDGH7si2PGOScSJ2RIpZKZ_IUV5UdKoCGJSnf8FdAeg9M0ii6ma-yR2sfCbpKNiHo9QmfhZ8RVUYWFGRm-BaUKCuYgx')">
+</div>
+<!-- OCR Scan Overlay Effect -->
+<div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+<div class="border-2 border-primary-fixed w-3/4 h-1/2 rounded-lg relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-0.5 bg-primary-fixed shadow-[0_0_15px_#97f3e2] animate-[scan_3s_ease-in-out_infinite]"></div>
+</div>
+</div>
+<div class="absolute bottom-4 left-4 bg-black/60 text-white text-label-md px-3 py-1 rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">photo_camera</span>
+                撮影された画像
+            </div>
+</section>
+<!-- Bottom Component (65% height): Editable Form -->
+<section class="flex-grow bg-surface overflow-y-auto custom-scrollbar px-margin-mobile pt-8 pb-12">
+<div class="max-w-md mx-auto space-y-8">
+<div class="space-y-2">
+<p class="text-on-surface-variant font-label-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">description</span>
+                        読み取り結果
+                    </p>
+<p class="text-body-md text-on-surface-variant">
+                        文字が間違っている場合は、枠内をタップして修正してください。
+                    </p>
+</div>
+<!-- Input Field 1: Medicine Name -->
+<div class="space-y-3">
+<label class="block font-headline-md text-headline-md text-on-surface" for="medicine-name">
+                        お薬名 (Medicine Name)
+                    </label>
+<div class="relative focus-ring rounded-lg">
+<input class="w-full h-touch-target-critical px-4 bg-surface-container-low border-b-2 border-outline font-body-lg text-body-lg text-on-surface focus:border-primary transition-colors rounded-t-lg" id="medicine-name" type="text" value="ロキソプロフェンナトリウム"/>
+<div class="absolute right-4 top-1/2 -translate-y-1/2">
+<span class="material-symbols-outlined text-outline">edit</span>
+</div>
+</div>
+</div>
+<!-- Input Field 2: Dosage -->
+<div class="space-y-3">
+<label class="block font-headline-md text-headline-md text-on-surface" for="dosage">
+                        用法・用量 (Dosage)
+                    </label>
+<div class="relative focus-ring rounded-lg">
+<textarea class="w-full p-4 bg-surface-container-low border-b-2 border-outline font-body-lg text-body-lg text-on-surface focus:border-primary transition-colors rounded-t-lg resize-none" id="dosage" rows="2">1回1錠、1日3回 食後</textarea>
+<div class="absolute right-4 top-4">
+<span class="material-symbols-outlined text-outline">edit</span>
+</div>
+</div>
+</div>
+<!-- Warning/Note -->
+<div class="p-4 bg-error-container rounded-xl flex gap-4">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">warning</span>
+<div>
+<p class="text-on-error-container font-label-lg">確認のお願い</p>
+<p class="text-on-error-container text-label-md mt-1 leading-relaxed">
+                            AIの読み取りは100%正確ではありません。必ず実際のお薬の袋や説明書と比較してください。
+                        </p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Fixed Bottom Actions (Sticky row) -->
+<footer class="fixed bottom-0 left-0 w-full bg-surface-container-highest/90 backdrop-blur-md px-margin-mobile py-4 z-50 border-t border-outline-variant">
+<div class="flex items-center justify-between max-w-md mx-auto h-touch-target-critical">
+<!-- Left Outline Button (45% width) -->
+<button class="w-[45%] h-touch-target-critical border-2 border-primary text-primary font-bold rounded-full flex items-center justify-center gap-2 hover:bg-surface-variant active:scale-95 transition-all">
+<span class="material-symbols-outlined">refresh</span>
+<span class="font-label-lg">再撮影</span>
+</button>
+<!-- Right Solid Button (45% width) -->
+<button class="w-[45%] h-touch-target-critical bg-primary text-on-primary font-bold rounded-full flex items-center justify-center gap-2 shadow-md hover:brightness-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined">check_circle</span>
+<span class="font-label-lg">決定</span>
+</button>
+</div>
+</footer>
+<style>
+        @keyframes scan {
+            0%, 100% { top: 0; }
+            50% { top: 100%; }
+        }
+    </style>
+<script>
+        // Simple micro-interaction for input focus
+        const inputs = document.querySelectorAll('input, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('bg-white');
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.classList.remove('bg-white');
+            });
+        });
+
+        // Prevention of accidental zoom on mobile focus
+        document.addEventListener('touchstart', function (event) {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body></html>

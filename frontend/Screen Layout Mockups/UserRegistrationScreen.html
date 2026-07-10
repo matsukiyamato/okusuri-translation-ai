@@ -1,0 +1,242 @@
+<!DOCTYPE html><html class="light" lang="ja"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>アカウント新規登録 | お薬翻訳AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#005e53",
+                    "tertiary": "#465655",
+                    "surface": "#f6fafa",
+                    "background": "#f6fafa",
+                    "secondary-container": "#acedda",
+                    "surface-container": "#ebefef",
+                    "inverse-surface": "#2c3132",
+                    "on-primary": "#ffffff",
+                    "secondary": "#29695b",
+                    "inverse-on-surface": "#edf1f1",
+                    "on-error": "#ffffff",
+                    "primary-fixed": "#97f3e2",
+                    "tertiary-fixed": "#d4e6e5",
+                    "error": "#ba1a1a",
+                    "on-background": "#181c1d",
+                    "on-primary-fixed-variant": "#005047",
+                    "primary-fixed-dim": "#7ad7c6",
+                    "surface-variant": "#dfe3e3",
+                    "on-primary-fixed": "#00201b",
+                    "on-tertiary-fixed": "#0e1e1e",
+                    "outline-variant": "#bdc9c5",
+                    "tertiary-container": "#5d6e6e",
+                    "on-secondary-fixed": "#00201a",
+                    "on-surface": "#181c1d",
+                    "on-surface-variant": "#3e4946",
+                    "secondary-fixed": "#afefdd",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-primary": "#7ad7c6",
+                    "surface-dim": "#d7dbdb",
+                    "on-tertiary-container": "#def0ef",
+                    "on-secondary-container": "#2e6d5f",
+                    "surface-container-high": "#e5e9e9",
+                    "surface-container-low": "#f0f4f4",
+                    "secondary-fixed-dim": "#94d3c1",
+                    "outline": "#6e7a76",
+                    "on-error-container": "#93000a",
+                    "on-tertiary-fixed-variant": "#3a4a49",
+                    "error-container": "#ffdad6",
+                    "on-secondary-fixed-variant": "#065043",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-container": "#a1feec",
+                    "surface-container-highest": "#dfe3e3",
+                    "surface-bright": "#f6fafa",
+                    "tertiary-fixed-dim": "#b8cac9",
+                    "primary-container": "#00796b",
+                    "surface-tint": "#006b5e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "touch-target-critical": "56px",
+                    "section-gap": "24px",
+                    "element-gap": "8px",
+                    "gutter": "16px",
+                    "touch-target-min": "48px",
+                    "margin-mobile": "20px",
+                    "margin-tablet": "32px"
+            },
+            "fontFamily": {
+                    "label-lg": ["Atkinson Hyperlegible Next"],
+                    "headline-md": ["Atkinson Hyperlegible Next"],
+                    "body-lg": ["Atkinson Hyperlegible Next"],
+                    "headline-lg-mobile": ["Atkinson Hyperlegible Next"],
+                    "label-md": ["Atkinson Hyperlegible Next"],
+                    "body-md": ["Atkinson Hyperlegible Next"],
+                    "headline-lg": ["Atkinson Hyperlegible Next"]
+            },
+            "fontSize": {
+                    "label-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "0.1px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-lg": ["20px", {"lineHeight": "30px", "letterSpacing": "0.5px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "body-md": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "0.25px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Atkinson Hyperlegible Next', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom accessibility focus ring */
+        :focus-visible {
+            outline: 3px solid #29695b;
+            outline-offset: 2px;
+        }
+        /* Hide scrollbar but keep functionality */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col items-center overflow-x-hidden selection:bg-secondary-container">
+<!-- Top Navigation Bar (Logo Only for Registration) -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md flex items-center justify-center px-margin-mobile h-touch-target-critical shadow-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: &quot;FILL&quot; 1;">medical_services</span>
+<span class="text-headline-md font-headline-md font-bold text-primary">お薬翻訳AI</span>
+</div>
+</header>
+<main class="w-full max-w-md px-margin-mobile pt-32 pb-12 flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-700">
+<!-- Header Content -->
+<section class="mb-section-gap">
+<h1 class="font-headline-md text-headline-md text-on-surface mb-2">アカウント新規登録</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                安心してお薬を服用するために、アカウントを作成しましょう。
+            </p>
+</section>
+<!-- Main Registration Form -->
+<form class="flex flex-col gap-6" onsubmit="return false;">
+<!-- Email Input -->
+<div class="flex flex-col gap-2">
+<label class="font-label-lg text-label-lg text-on-surface" for="email">メールアドレス</label>
+<div class="relative group">
+<input class="w-full h-touch-target-critical px-4 bg-surface-container-low border-b-2 border-outline focus:border-primary focus:ring-0 transition-all font-body-md text-body-md rounded-t-lg" id="email" placeholder="メールアドレスを入力" required="" type="email">
+</div>
+</div>
+<!-- Password Input -->
+<div class="flex flex-col gap-2">
+<label class="font-label-lg text-label-lg text-on-surface" for="password">パスワード</label>
+<div class="relative group">
+<input class="w-full h-touch-target-critical pl-4 pr-12 bg-surface-container-low border-b-2 border-outline focus:border-primary focus:ring-0 transition-all font-body-md text-body-md rounded-t-lg" id="password" placeholder="パスワードを入力 (英大文字・小文字・数字・記号を含む8文字以上)" required="" type="password">
+<button aria-label="パスワードの表示を切り替える" class="absolute right-2 top-1/2 -translate-y-1/2 w-touch-target-min h-touch-target-min flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors" id="togglePassword" type="button">
+<span class="material-symbols-outlined" id="eyeIcon">visibility</span>
+</button>
+</div>
+</div>
+<!-- CTA Primary Action -->
+<button class="mt-4 h-touch-target-critical bg-primary-container text-on-primary-container font-label-lg text-label-lg rounded-full shadow-sm hover:shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 group" type="submit">
+                登録する
+                <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</form>
+<!-- Divider -->
+<div class="flex items-center gap-4 my-section-gap">
+<div class="flex-1 h-px bg-outline-variant"></div>
+<span class="font-label-md text-label-md text-outline">または</span>
+<div class="flex-1 h-px bg-outline-variant"></div>
+</div>
+<!-- Social Auth -->
+<div class="flex flex-col gap-4">
+<button class="h-touch-target-critical w-full flex items-center justify-center gap-3 bg-surface-container-lowest border border-outline-variant rounded-full font-label-lg text-label-lg text-on-surface hover:bg-surface-variant transition-colors active:scale-95">
+<img alt="Google" class="w-6 h-6" src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png">
+                Googleアカウントで登録
+            </button>
+</div>
+<!-- Secondary Imagery / Atmosphere -->
+<div class="mt-section-gap relative rounded-xl overflow-hidden aspect-[16/9] shadow-sm">
+<div class="w-full h-full bg-cover bg-center" data-alt="A warm and clinical high-quality photograph of a friendly healthcare professional holding a tablet showing medical information. The scene is illuminated with soft natural light in a modern medical clinic with soft teal accents and clean white walls. The atmosphere is professional, empathetic, and technologically advanced, echoing the clinical yet compassionate medical translation app identity." style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuAt2DfiqurNgLWK9ywZ3upBdwN8QohXc30De12SlGA6nN8negtg4Snhd5FA4_yQYMVw0l0FIXBgtotA53FWg70MihZ7JseyKqZ6EIe8CeezJ5r-k3S57WjSICqc6FNSkBWmsOE5yguiizh-JZt6B788XYaOq9eoA-sWbUqUS_at-8lKT0IV7DS8RnkNIe3xEjkE0fUPz_T7tXlFZBh1oIpYNcvcw2SxMPlOILd_sOW3kpFgmRYMXtNH&quot;);"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+<div class="absolute bottom-4 left-4 right-4">
+<span class="text-white font-label-md text-label-md bg-primary/80 backdrop-blur-sm px-3 py-1 rounded-full">AIがあなたのお薬をサポート</span>
+</div>
+</div>
+<!-- Navigation Link -->
+<nav class="mt-section-gap text-center">
+<a class="inline-block py-2 font-label-lg text-label-lg text-secondary hover:underline underline-offset-4 decoration-2 transition-all" href="#">
+                すでにアカウントをお持ちの方はこちら（ログイン画面へ）
+            </a>
+</nav>
+<!-- Footer Privacy -->
+<footer class="mt-auto pt-12 pb-6 text-center">
+<p class="font-label-md text-label-md text-on-surface-variant">
+                登録することで、利用規約とプライバシーポリシーに同意したことになります。
+            </p>
+</footer>
+</main>
+<!-- Micro-interactions Script -->
+<script>
+        // Password Visibility Toggle
+        const toggleBtn = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eyeIcon');
+
+        toggleBtn.addEventListener('click', () => {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            eyeIcon.textContent = isPassword ? 'visibility_off' : 'visibility';
+        });
+
+        // Simple button haptic feedback simulation
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('touchstart', function() {
+                this.classList.add('opacity-80');
+            });
+            btn.addEventListener('touchend', function() {
+                this.classList.remove('opacity-80');
+            });
+        });
+
+        // Form focus visual enhancements
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.parentElement.classList.add('scale-[1.01]');
+                input.parentElement.parentElement.style.transition = 'all 0.2s ease-out';
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.parentElement.classList.remove('scale-[1.01]');
+            });
+        });
+    </script>
+
+
+</body></html>
