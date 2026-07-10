@@ -240,6 +240,8 @@ JWTトークンを検証・デコードし、セキュアに送信されたユ�
 
 ## 8. ディレクトリ構造
 ```text
+## 8. ディレクトリ構造
+```text
 okusuri-translation-ai/
 ├── .gitignore
 ├── README.md
@@ -256,7 +258,7 @@ okusuri-translation-ai/
 │       ├── navigation/        # 画面遷移定義
 │       │   └── AppNavigator.tsx
 │       ├── screens/           # UI実装
-│       │   ├── UserRegistrationScreen.tsx  # ①新規ユーザー登録画面（Google OAuthボタン配置）
+│       │   ├── UserRegistrationScreen.tsx  # ①ユーザー登録画面（Google OAuthボタン配置）
 │       │   ├── PasswordSetupScreen.tsx     # ②パスワード追加設定画面（読み取り専用email、可視化トグル付き）
 │       │   ├── UserLoginScreen.tsx         # ③ログイン画面（完全分離されたローカル認証用）
 │       │   ├── ModeSelectionScreen.tsx     # ④モード選択画面
@@ -276,10 +278,14 @@ okusuri-translation-ai/
         ├── main.py            # アプリケーションのエントリーポイント
         ├── config.py          # 環境変数・APIキー管理
         ├── api/               # エンドポイント定義
-        │   ├── auth.py        # 【追加】認証エンドポイント（Google callback、パスワード登録、ローカルログイン）
+        │   ├── auth.py        # 認証（Google callback、パスワード登録、ローカルログイン）
+        │   ├── user.py        # 【追加】ユーザー設定（interface_modeの保存・照合）
         │   ├── ocr.py         # Google Cloud Vision OCR連携
         │   ├── rag.py         # RAG検索・Gemini Flash生成
         │   └── dictionary.py  # 手話辞書管理データ
+        ├── schemas/           # 【追加】Pydanticによる厳格な型定義（リクエスト/レスポンスモデル）
+        │   ├── auth.py        # ログイン・パスワード追加登録用スキーマ
+        │   └── user.py        # interface_mode検証用スキーマ
         ├── mcp/               # Model Context Protocol関連
         │   ├── client.py      # FastMCPクライアント
         │   └── connectors/    # 各種MCPコネクタ（PMDA等）
@@ -288,7 +294,8 @@ okusuri-translation-ai/
         │   ├── rag_service.py # LangChain + ChromaDB
         │   └── sign_service.py
         └── utils/             # 共通ユーティリティ
-            └── security.py    # 【追加】医療ポリシーフィルタ検知ロジック、およびArgon2ハッシュ化・JWT検証処理
+            ├── security.py    # 医療ポリシーフィルタ（禁止質問検知・拒否ロジック）
+            └── crypto.py      # 【追加】Argon2idハッシュ、AES-256-GCM暗号化、JWT検証処理
 ```
 ---
 
