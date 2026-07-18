@@ -1,1 +1,1 @@
-// ScanGuidanceScreen.tsx
+//ScanGuidanceScreen.tsx

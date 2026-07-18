@@ -1,1 +1,1 @@
-// TextAudioResultScreen.tsx
+//TextAudioResultScreen.tsx

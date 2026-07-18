@@ -1,1 +1,1 @@
-// CameraCaptureScreen.tsx
+//CameraCaptureScreen.tsx
