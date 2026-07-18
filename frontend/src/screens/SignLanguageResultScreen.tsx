@@ -1,1 +1,1 @@
-// SignLanguageResultScreen.tsx
+//SignLanguageResultScreen.tsx

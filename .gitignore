@@ -12,8 +12,13 @@ __pycache__/
 # 開発環境・機密情報
 .env
 .env.local
+.env.example
 
 # エディタ設定
 .vscode/
 .idea/
 EOF
+
+# データベース
+.spl
+.db
