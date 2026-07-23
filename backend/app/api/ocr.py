@@ -72,7 +72,7 @@ async def upload_ocr_image(
         await image.close()
 
         raise HTTPException(
-            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            status_code=status.HTTP_413_CONTENT_TOO_LARGE,
             detail={
                 "code": "UNSUPPORTED_IMAGE_TYPE",
                 "message": (
