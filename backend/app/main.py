@@ -1,22 +1,52 @@
-from fastapi import FastAPI
+"""FastAPIアプリケーションのエントリーポイント。"""
 
-from app.api.auth import router as auth_router
-from app.api.health import router as health_router
-from app.api.user import router as user_router
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+import logging
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.config import settings
+from app.database import create_database, dispose_database
+
+
+logger: logging.Logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    """FastAPIの起動処理と終了処理を管理する。"""
+    create_database()
+    logger.info("SQLite database initialization completed")
+
+    yield
+
+    dispose_database()
+    logger.info("SQLite database resources disposed")
 
 
 app = FastAPI(
-    title="お薬翻訳AI API",
-    version="0.1.0",
+    title=settings.app_name,
+    description="お薬翻訳AIのバックエンドAPI",
+    version=settings.app_version,
+    debug=settings.debug,
+    lifespan=lifespan,
 )
 
-app.include_router(health_router)
-app.include_router(auth_router)
-app.include_router(user_router)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
-def root() -> dict[str, str]:
+async def root() -> dict[str, str]:
+    """FastAPIサーバーの起動状態を返す。"""
     return {
-        "message": "Okusuri Translation AI API",
+        "message": "Okusuri Translation AI API is running",
+        "status": "ok",
     }

@@ -1,59 +1,82 @@
 // frontend/src/screens/ModeSelectionScreen.tsx
 
-import React, { useCallback } from 'react';
+import React, {
+  useCallback,
+  useMemo,
+} from 'react';
+
 import {
+  Platform,
   Pressable,
   SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
   type GestureResponderEvent,
   type PressableStateCallbackType,
   type ViewStyle,
 } from 'react-native';
+
 import { MaterialIcons } from '@expo/vector-icons';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+
+import type {
+  NativeStackScreenProps,
+} from '@react-navigation/native-stack';
 
 /**
  * アプリ内で使用する表示モード。
  *
- * 後続画面では、この値をnavigation parameterとして引き継ぎます。
+ * 後続画面では、この値をReact Navigationの
+ * navigation parameterとして引き継ぎます。
  */
-export type TranslationDisplayMode = 'textAudio' | 'signLanguage';
+export type TranslationDisplayMode =
+  | 'textAudio'
+  | 'signLanguage';
 
 /**
  * React Navigationで使用する画面とパラメータの型。
  *
- * 現時点ではModeSelectionとScanGuidanceのみ定義しています。
- * 後ほどAppNavigator.tsxを作成するときに、残りの画面を追加します。
+ * CameraCaptureScreenで撮影した画像は、
+ * Web版ではdata URLとしてOcrVerificationへ渡せるようにします。
  */
 export type RootStackParamList = {
   ModeSelection: undefined;
+
   ScanGuidance: {
     displayMode: TranslationDisplayMode;
   };
+
   CameraCapture: {
     displayMode: TranslationDisplayMode;
   };
+
   OcrVerification: {
     displayMode: TranslationDisplayMode;
+    capturedImageUri?: string;
   };
+
   TextAudioResult: {
     recognizedText?: string;
   };
+
   SignLanguageResult: {
     recognizedText?: string;
   };
 };
 
-type ModeSelectionScreenProps = NativeStackScreenProps<
-  RootStackParamList,
-  'ModeSelection'
->;
+type ModeSelectionScreenProps =
+  NativeStackScreenProps<
+    RootStackParamList,
+    'ModeSelection'
+  >;
 
-type MaterialIconName = React.ComponentProps<typeof MaterialIcons>['name'];
+type MaterialIconName =
+  React.ComponentProps<
+    typeof MaterialIcons
+  >['name'];
 
 type ModeCardProps = {
   title: string;
@@ -62,21 +85,81 @@ type ModeCardProps = {
   secondIcon: MaterialIconName;
   accessibilityHint: string;
   onPress: () => void;
+  isDesktopLayout: boolean;
 };
 
-type BottomNavigationItemProps = {
+type NavigationItemProps = {
   label: string;
   iconName: MaterialIconName;
   isSelected?: boolean;
   onPress?: () => void;
 };
 
+type HeaderIconButtonProps = {
+  accessibilityLabel: string;
+  accessibilityHint: string;
+  iconName: MaterialIconName;
+  onPress: () => void;
+};
+
+/**
+ * Web版のブレークポイント。
+ *
+ * 768px以上ではモードカードを横並びにします。
+ */
+const DESKTOP_BREAKPOINT = 768;
+
+/**
+ * Web版コンテンツの最大幅。
+ */
+const WEB_CONTENT_MAX_WIDTH = 1120;
+
+/**
+ * ヘッダーのアイコンボタン。
+ */
+const HeaderIconButton = ({
+  accessibilityLabel,
+  accessibilityHint,
+  iconName,
+  onPress,
+}: HeaderIconButtonProps): React.JSX.Element => {
+  const getButtonStyle = useCallback(
+    ({
+      pressed,
+    }: PressableStateCallbackType): ViewStyle[] => [
+      styles.headerIconButton,
+      pressed
+        ? styles.headerIconButtonPressed
+        : styles.headerIconButtonDefault,
+    ],
+    [],
+  );
+
+  return (
+    <Pressable
+      accessibilityHint={accessibilityHint}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="button"
+      hitSlop={8}
+      onPress={onPress}
+      style={getButtonStyle}
+    >
+      <MaterialIcons
+        accessibilityElementsHidden
+        color={COLORS.primary}
+        importantForAccessibility="no-hide-descendants"
+        name={iconName}
+        size={28}
+      />
+    </Pressable>
+  );
+};
+
 /**
  * モード選択カード。
  *
- * HTML上のbento-cardをReact Nativeへ変換しています。
- * カードを押している間はscaleを0.97にして、
- * HTMLのactive時の視覚フィードバックを再現します。
+ * Web版では画面幅768px以上で2枚を横並びにします。
+ * 押下時の視覚フィードバックはReact Native Webでも動作します。
  */
 const ModeCard = ({
   title,
@@ -85,74 +168,105 @@ const ModeCard = ({
   secondIcon,
   accessibilityHint,
   onPress,
+  isDesktopLayout,
 }: ModeCardProps): React.JSX.Element => {
   const getCardStyle = useCallback(
-    ({ pressed }: PressableStateCallbackType): ViewStyle[] => [
+    ({
+      pressed,
+    }: PressableStateCallbackType): ViewStyle[] => [
       styles.modeCard,
-      pressed ? styles.modeCardPressed : styles.modeCardDefault,
+      isDesktopLayout
+        ? styles.modeCardDesktop
+        : styles.modeCardMobile,
+      pressed
+        ? styles.modeCardPressed
+        : styles.modeCardDefault,
     ],
-    [],
+    [isDesktopLayout],
   );
 
   return (
     <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={title}
       accessibilityHint={accessibilityHint}
-      android_ripple={{
-        color: COLORS.secondaryContainer,
-        borderless: false,
-        foreground: true,
-      }}
+      accessibilityLabel={title}
+      accessibilityRole="button"
       onPress={onPress}
       style={getCardStyle}
     >
       <View style={styles.iconRow}>
-        <View style={[styles.iconCircle, styles.primaryIconCircle]}>
+        <View
+          style={[
+            styles.iconCircle,
+            styles.primaryIconCircle,
+          ]}
+        >
           <MaterialIcons
             accessibilityElementsHidden
             color={COLORS.onPrimaryFixed}
             importantForAccessibility="no-hide-descendants"
             name={firstIcon}
-            size={38}
+            size={40}
           />
         </View>
 
-        <View style={[styles.iconCircle, styles.secondaryIconCircle]}>
+        <View
+          style={[
+            styles.iconCircle,
+            styles.secondaryIconCircle,
+          ]}
+        >
           <MaterialIcons
             accessibilityElementsHidden
             color={COLORS.onSecondaryFixed}
             importantForAccessibility="no-hide-descendants"
             name={secondIcon}
-            size={38}
+            size={40}
           />
         </View>
       </View>
 
       <View style={styles.modeTextContainer}>
-        <Text style={styles.modeTitle}>{title}</Text>
+        <Text style={styles.modeTitle}>
+          {title}
+        </Text>
 
-        <Text style={styles.modeDescription}>{description}</Text>
+        <Text style={styles.modeDescription}>
+          {description}
+        </Text>
+      </View>
+
+      <View style={styles.cardActionRow}>
+        <Text style={styles.cardActionText}>
+          このモードを選択
+        </Text>
+
+        <MaterialIcons
+          accessibilityElementsHidden
+          color={COLORS.primary}
+          importantForAccessibility="no-hide-descendants"
+          name="arrow-forward"
+          size={22}
+        />
       </View>
     </Pressable>
   );
 };
 
 /**
- * 下部ナビゲーションの1項目。
+ * 下部ナビゲーションの各項目。
  *
- * 現段階では画面デザインの再現が目的です。
- * 履歴・手話・設定の画面は今回の実装対象に含まれていないため、
- * onPressが渡されていない項目は操作を無効化しています。
+ * 今回の実装対象外画面はdisabled状態にします。
  */
-const BottomNavigationItem = ({
+const NavigationItem = ({
   label,
   iconName,
   isSelected = false,
   onPress,
-}: BottomNavigationItemProps): React.JSX.Element => {
+}: NavigationItemProps): React.JSX.Element => {
   const handlePress = useCallback(
-    (event: GestureResponderEvent): void => {
+    (
+      event: GestureResponderEvent,
+    ): void => {
       event.stopPropagation();
       onPress?.();
     },
@@ -160,22 +274,24 @@ const BottomNavigationItem = ({
   );
 
   const getItemStyle = useCallback(
-    ({ pressed }: PressableStateCallbackType): ViewStyle[] => [
-      styles.bottomNavigationItem,
+    ({
+      pressed,
+    }: PressableStateCallbackType): ViewStyle[] => [
+      styles.navigationItem,
       isSelected
-        ? styles.bottomNavigationItemSelected
-        : styles.bottomNavigationItemUnselected,
+        ? styles.navigationItemSelected
+        : styles.navigationItemUnselected,
       pressed && onPress !== undefined
-        ? styles.bottomNavigationItemPressed
-        : styles.bottomNavigationItemNotPressed,
+        ? styles.navigationItemPressed
+        : styles.navigationItemIdle,
     ],
     [isSelected, onPress],
   );
 
   return (
     <Pressable
-      accessibilityRole="button"
       accessibilityLabel={label}
+      accessibilityRole="button"
       accessibilityState={{
         disabled: onPress === undefined,
         selected: isSelected,
@@ -198,10 +314,10 @@ const BottomNavigationItem = ({
 
       <Text
         style={[
-          styles.bottomNavigationLabel,
+          styles.navigationLabel,
           isSelected
-            ? styles.bottomNavigationLabelSelected
-            : styles.bottomNavigationLabelUnselected,
+            ? styles.navigationLabelSelected
+            : styles.navigationLabelUnselected,
         ]}
       >
         {label}
@@ -213,47 +329,81 @@ const BottomNavigationItem = ({
 const ModeSelectionScreen = ({
   navigation,
 }: ModeSelectionScreenProps): React.JSX.Element => {
+  const {
+    width,
+  } = useWindowDimensions();
+
+  /**
+   * 画面幅768px以上をデスクトップレイアウトとします。
+   */
+  const isDesktopLayout = useMemo(
+    (): boolean =>
+      width >= DESKTOP_BREAKPOINT,
+    [width],
+  );
+
   /**
    * ④で選択したモードを⑤へ渡します。
    *
    * textAudio:
-   * ScanGuidance → CameraCapture → OcrVerification → TextAudioResult
+   * ScanGuidance
+   * → CameraCapture
+   * → OcrVerification
+   * → TextAudioResult
    *
    * signLanguage:
-   * ScanGuidance → CameraCapture → OcrVerification → SignLanguageResult
+   * ScanGuidance
+   * → CameraCapture
+   * → OcrVerification
+   * → SignLanguageResult
    */
   const handleSelectMode = useCallback(
-    (displayMode: TranslationDisplayMode): void => {
-      navigation.navigate('ScanGuidance', {
-        displayMode,
-      });
+    (
+      displayMode: TranslationDisplayMode,
+    ): void => {
+      navigation.navigate(
+        'ScanGuidance',
+        {
+          displayMode,
+        },
+      );
     },
     [navigation],
   );
 
-  const handleTextAudioModePress = useCallback((): void => {
-    handleSelectMode('textAudio');
-  }, [handleSelectMode]);
+  const handleTextAudioModePress =
+    useCallback((): void => {
+      handleSelectMode('textAudio');
+    }, [handleSelectMode]);
 
-  const handleSignLanguageModePress = useCallback((): void => {
-    handleSelectMode('signLanguage');
-  }, [handleSelectMode]);
+  const handleSignLanguageModePress =
+    useCallback((): void => {
+      handleSelectMode('signLanguage');
+    }, [handleSelectMode]);
 
   /**
-   * ログイン・ユーザー登録は今回実装しないため、
-   * アカウントボタンは表示のみとします。
+   * メニュー画面は今回の実装対象外です。
    */
-  const handleMenuPress = useCallback((): void => {
-    // メニュー画面は今回の実装対象外です。
-  }, []);
+  const handleMenuPress =
+    useCallback((): void => {
+      // 現段階では処理を実装しません。
+    }, []);
 
-  const handleAccountPress = useCallback((): void => {
-    // ユーザー登録・ログイン画面は今回の実装対象外です。
-  }, []);
+  /**
+   * ユーザー登録・ログイン画面は今回実装しません。
+   */
+  const handleAccountPress =
+    useCallback((): void => {
+      // 現段階では処理を実装しません。
+    }, []);
 
-  const handleTranslationTabPress = useCallback((): void => {
-    // 現在表示中の画面なので遷移処理は不要です。
-  }, []);
+  /**
+   * 現在表示中の画面なので遷移処理は不要です。
+   */
+  const handleTranslationTabPress =
+    useCallback((): void => {
+      // 現在選択中のタブです。
+    }, []);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -263,139 +413,196 @@ const ModeSelectionScreen = ({
       />
 
       <View style={styles.screen}>
-        {/* TopAppBar */}
-        <View style={styles.topAppBar}>
-          <Pressable
-            accessibilityHint="アプリのメニューを開きます"
-            accessibilityLabel="メニュー"
-            accessibilityRole="button"
-            android_ripple={{
-              borderless: true,
-              color: COLORS.surfaceVariant,
-              radius: 24,
-            }}
-            hitSlop={8}
-            onPress={handleMenuPress}
-            style={({ pressed }) => [
-              styles.topAppBarIconButton,
-              pressed && styles.topAppBarIconButtonPressed,
-            ]}
-          >
-            <MaterialIcons
-              color={COLORS.primary}
-              name="menu"
-              size={28}
+        {/* Web対応ヘッダー */}
+        <View style={styles.header}>
+          <View style={styles.headerInner}>
+            <HeaderIconButton
+              accessibilityHint="アプリのメニューを開きます"
+              accessibilityLabel="メニュー"
+              iconName="menu"
+              onPress={handleMenuPress}
             />
-          </Pressable>
 
-          <Text
-            accessibilityRole="header"
-            numberOfLines={1}
-            style={styles.appTitle}
-          >
-            お薬翻訳AI
-          </Text>
+            <View style={styles.brandArea}>
+              <View style={styles.brandIcon}>
+                <MaterialIcons
+                  accessibilityElementsHidden
+                  color={COLORS.onPrimary}
+                  importantForAccessibility="no-hide-descendants"
+                  name="medication"
+                  size={25}
+                />
+              </View>
 
-          <Pressable
-            accessibilityHint="アカウント情報を開きます"
-            accessibilityLabel="アカウント"
-            accessibilityRole="button"
-            android_ripple={{
-              borderless: true,
-              color: COLORS.surfaceVariant,
-              radius: 24,
-            }}
-            hitSlop={8}
-            onPress={handleAccountPress}
-            style={({ pressed }) => [
-              styles.topAppBarIconButton,
-              pressed && styles.topAppBarIconButtonPressed,
-            ]}
-          >
-            <MaterialIcons
-              color={COLORS.primary}
-              name="account-circle"
-              size={29}
+              <Text
+                accessibilityRole="header"
+                numberOfLines={1}
+                style={styles.appTitle}
+              >
+                お薬翻訳AI
+              </Text>
+            </View>
+
+            <HeaderIconButton
+              accessibilityHint="アカウント情報を開きます"
+              accessibilityLabel="アカウント"
+              iconName="account-circle"
+              onPress={handleAccountPress}
             />
-          </Pressable>
+          </View>
         </View>
 
-        {/* Main Content Canvas */}
+        {/* メインコンテンツ */}
         <ScrollView
           alwaysBounceVertical={false}
           bounces={false}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={
+            styles.scrollContent
+          }
+          keyboardShouldPersistTaps="handled"
           overScrollMode="never"
           showsVerticalScrollIndicator={false}
         >
-          {/* Screen Title Section */}
-          <View style={styles.titleSection}>
-            <Text
-              accessibilityRole="header"
-              style={styles.screenTitle}
-            >
-              表示モードの選択
-            </Text>
-
-            <Text style={styles.screenSubtitle}>
-              どちらの表示方法を希望しますか？
-            </Text>
-          </View>
-
-          {/* Symmetrical Grid Layout */}
-          <View style={styles.modeCardContainer}>
-            <ModeCard
-              accessibilityHint="テキストと音声による説明を選択して、撮影案内画面へ進みます"
-              description="お薬の説明を「やさしい日本語」の文字で表示し、自動で読み上げます。"
-              firstIcon="description"
-              onPress={handleTextAudioModePress}
-              secondIcon="volume-up"
-              title="テキスト・音声モード"
-            />
-
-            <ModeCard
-              accessibilityHint="手話動画による説明を選択して、撮影案内画面へ進みます"
-              description="字幕付きの手話動画と音声でお薬の説明を再生します。"
-              firstIcon="sign-language"
-              onPress={handleSignLanguageModePress}
-              secondIcon="play-circle-outline"
-              title="手話動画モード"
-            />
-          </View>
-
-          {/* Decorative Illustration Placeholder */}
           <View
-            accessibilityElementsHidden
-            importantForAccessibility="no-hide-descendants"
-            style={styles.decorativeArea}
+            style={[
+              styles.contentContainer,
+              isDesktopLayout
+                ? styles.contentContainerDesktop
+                : styles.contentContainerMobile,
+            ]}
           >
-            <View style={styles.decorativeLine} />
+            {/* タイトル */}
+            <View
+              style={[
+                styles.titleSection,
+                isDesktopLayout
+                  ? styles.titleSectionDesktop
+                  : styles.titleSectionMobile,
+              ]}
+            >
+              <View style={styles.titleBadge}>
+                <MaterialIcons
+                  accessibilityElementsHidden
+                  color={COLORS.primary}
+                  importantForAccessibility="no-hide-descendants"
+                  name="translate"
+                  size={19}
+                />
+
+                <Text style={styles.titleBadgeText}>
+                  翻訳方法を選択
+                </Text>
+              </View>
+
+              <Text
+                accessibilityRole="header"
+                style={[
+                  styles.screenTitle,
+                  isDesktopLayout
+                    ? styles.screenTitleDesktop
+                    : styles.screenTitleMobile,
+                ]}
+              >
+                表示モードの選択
+              </Text>
+
+              <Text
+                style={[
+                  styles.screenSubtitle,
+                  isDesktopLayout
+                    ? styles.screenSubtitleDesktop
+                    : styles.screenSubtitleMobile,
+                ]}
+              >
+                お薬の説明を受け取る方法を
+                選択してください。
+              </Text>
+            </View>
+
+            {/* Webでは横並び、狭い画面では縦並び */}
+            <View
+              style={[
+                styles.modeCardContainer,
+                isDesktopLayout
+                  ? styles.modeCardContainerDesktop
+                  : styles.modeCardContainerMobile,
+              ]}
+            >
+              <ModeCard
+                accessibilityHint="テキストと音声による説明を選択し、撮影案内画面へ進みます"
+                description="お薬の説明を「やさしい日本語」の文字で表示し、ブラウザの音声機能で読み上げます。"
+                firstIcon="description"
+                isDesktopLayout={isDesktopLayout}
+                onPress={handleTextAudioModePress}
+                secondIcon="volume-up"
+                title="テキスト・音声モード"
+              />
+
+              <ModeCard
+                accessibilityHint="手話動画による説明を選択し、撮影案内画面へ進みます"
+                description="字幕付きの手話動画を使って、お薬の説明を分かりやすく表示します。"
+                firstIcon="sign-language"
+                isDesktopLayout={isDesktopLayout}
+                onPress={handleSignLanguageModePress}
+                secondIcon="play-circle-outline"
+                title="手話動画モード"
+              />
+            </View>
+
+            {/* 補足 */}
+            <View style={styles.informationCard}>
+              <MaterialIcons
+                accessibilityElementsHidden
+                color={COLORS.primary}
+                importantForAccessibility="no-hide-descendants"
+                name="info-outline"
+                size={23}
+              />
+
+              <Text style={styles.informationText}>
+                選択後、Webカメラを使って
+                お薬の説明書を撮影します。
+                カメラの使用許可が求められた場合は、
+                ブラウザ上で許可してください。
+              </Text>
+            </View>
           </View>
         </ScrollView>
 
-        {/* Bottom Navigation */}
+        {/* 下部ナビゲーション */}
         <View style={styles.bottomNavigation}>
-          <BottomNavigationItem
-            iconName="translate"
-            isSelected
-            label="翻訳"
-            onPress={handleTranslationTabPress}
-          />
+          <View
+            style={[
+              styles.bottomNavigationInner,
+              isDesktopLayout
+                ? styles.bottomNavigationInnerDesktop
+                : styles.bottomNavigationInnerMobile,
+            ]}
+          >
+            <NavigationItem
+              iconName="translate"
+              isSelected
+              label="翻訳"
+              onPress={
+                handleTranslationTabPress
+              }
+            />
 
-          <BottomNavigationItem
-            iconName="history"
-            label="履歴"
-          />
+            <NavigationItem
+              iconName="history"
+              label="履歴"
+            />
 
-          <BottomNavigationItem
-            iconName="sign-language"
-            label="手話"
-          />
+            <NavigationItem
+              iconName="sign-language"
+              label="手話"
+            />
 
-          <BottomNavigationItem
-            iconName="settings"
-            label="設定"
-          />
+            <NavigationItem
+              iconName="settings"
+              label="設定"
+            />
+          </View>
         </View>
       </View>
     </SafeAreaView>
@@ -404,29 +611,33 @@ const ModeSelectionScreen = ({
 
 export default ModeSelectionScreen;
 
-/**
- * HTMLで定義されているMaterial Design 3カラーパレット。
- *
- * 今回の画面で使用する色のみを抽出しています。
- * 新しいthemeファイルは追加しないという条件に従い、
- * このファイル内で管理しています。
- */
 const COLORS = {
   primary: '#005e53',
+  primaryContainer: '#00796b',
+  onPrimary: '#ffffff',
+
   surface: '#f6fafa',
   background: '#f6fafa',
+  surfaceContainerLow: '#f0f4f4',
+  surfaceContainer: '#e9eeee',
+  surfaceVariant: '#dfe3e3',
+
   secondaryContainer: '#acedda',
   primaryFixed: '#97f3e2',
   secondaryFixed: '#afefdd',
-  surfaceVariant: '#dfe3e3',
+
   onPrimaryFixed: '#00201b',
   onSecondaryFixed: '#00201a',
+
   onBackground: '#181c1d',
   onSurface: '#181c1d',
   onSurfaceVariant: '#3e4946',
   onSecondaryContainer: '#2e6d5f',
-  surfaceContainerLow: '#f0f4f4',
+
   outlineVariant: '#bdc9c5',
+
+  white: '#ffffff',
+  shadow: '#000000',
 } as const;
 
 const styles = StyleSheet.create({
@@ -440,32 +651,71 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
 
-  /*
-   * HTML:
-   * fixed top-0 / h-touch-target-critical（56px）
-   * px-margin-mobile（20px）
+  /**
+   * Webヘッダー
    */
-  topAppBar: {
+  header: {
     zIndex: 50,
-    height: 56,
-    paddingHorizontal: 20,
+    minHeight: 68,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.outlineVariant,
     backgroundColor: COLORS.surface,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
 
-    elevation: 2,
-
-    shadowColor: '#000000',
+    shadowColor: COLORS.shadow,
     shadowOffset: {
       width: 0,
       height: 1,
     },
-    shadowOpacity: 0.12,
-    shadowRadius: 2,
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+
+    elevation: 3,
   },
 
-  topAppBarIconButton: {
+  headerInner: {
+    width: '100%',
+    maxWidth: WEB_CONTENT_MAX_WIDTH,
+    minHeight: 68,
+    paddingHorizontal: 20,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+
+  brandArea: {
+    flex: 1,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  brandIcon: {
+    width: 38,
+    height: 38,
+    marginRight: 10,
+    borderRadius: 19,
+    backgroundColor:
+      COLORS.primaryContainer,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  appTitle: {
+    maxWidth: 300,
+    color: COLORS.primary,
+    fontFamily: Platform.select({
+      web: 'system-ui',
+      default: 'sans-serif',
+    }),
+    fontSize: 24,
+    fontWeight: '700',
+    lineHeight: 32,
+    textAlign: 'center',
+  },
+
+  headerIconButton: {
     width: 48,
     height: 48,
     borderRadius: 24,
@@ -473,137 +723,225 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  topAppBarIconButtonPressed: {
-    backgroundColor: COLORS.surfaceVariant,
-    transform: [{ scale: 0.95 }],
+  headerIconButtonDefault: {
+    backgroundColor: 'transparent',
+    transform: [
+      {
+        scale: 1,
+      },
+    ],
   },
 
-  appTitle: {
-    flex: 1,
-    paddingHorizontal: 8,
-    color: COLORS.primary,
-    fontFamily: 'sans-serif',
-    fontSize: 24,
-    fontWeight: '700',
-    lineHeight: 32,
-    textAlign: 'center',
+  headerIconButtonPressed: {
+    backgroundColor:
+      COLORS.surfaceVariant,
+    transform: [
+      {
+        scale: 0.95,
+      },
+    ],
   },
 
-  /*
-   * BottomNavigationがabsolute配置のため、
-   * 下部に100pxの余白を確保しています。
+  /**
+   * メイン領域
    */
   scrollContent: {
     flexGrow: 1,
     width: '100%',
-    maxWidth: 512,
-    alignSelf: 'center',
-    paddingHorizontal: 20,
-    paddingBottom: 100,
+    paddingBottom: 32,
   },
 
-  /*
-   * HTML:
-   * mt-8（32px）
-   * mb-10（40px）
+  contentContainer: {
+    width: '100%',
+    maxWidth: WEB_CONTENT_MAX_WIDTH,
+    alignSelf: 'center',
+  },
+
+  contentContainerDesktop: {
+    paddingHorizontal: 32,
+  },
+
+  contentContainerMobile: {
+    paddingHorizontal: 20,
+  },
+
+  /**
+   * タイトル
    */
   titleSection: {
-    marginTop: 32,
-    marginBottom: 40,
     alignItems: 'center',
+  },
+
+  titleSectionDesktop: {
+    marginTop: 64,
+    marginBottom: 44,
+  },
+
+  titleSectionMobile: {
+    marginTop: 36,
+    marginBottom: 32,
+  },
+
+  titleBadge: {
+    marginBottom: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor:
+      COLORS.secondaryContainer,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  titleBadgeText: {
+    marginLeft: 7,
+    color:
+      COLORS.onSecondaryContainer,
+    fontFamily: Platform.select({
+      web: 'system-ui',
+      default: 'sans-serif',
+    }),
+    fontSize: 14,
+    fontWeight: '700',
+    lineHeight: 20,
   },
 
   screenTitle: {
-    marginBottom: 8,
+    marginBottom: 12,
     color: COLORS.onSurface,
-    fontFamily: 'sans-serif',
-    fontSize: 24,
+    fontFamily: Platform.select({
+      web: 'system-ui',
+      default: 'sans-serif',
+    }),
     fontWeight: '700',
-    lineHeight: 32,
     textAlign: 'center',
+  },
+
+  screenTitleDesktop: {
+    fontSize: 38,
+    lineHeight: 48,
+  },
+
+  screenTitleMobile: {
+    fontSize: 28,
+    lineHeight: 36,
   },
 
   screenSubtitle: {
+    maxWidth: 640,
     color: COLORS.onSurfaceVariant,
-    fontFamily: 'sans-serif',
-    fontSize: 18,
+    fontFamily: Platform.select({
+      web: 'system-ui',
+      default: 'sans-serif',
+    }),
     fontWeight: '400',
-    lineHeight: 28,
     textAlign: 'center',
   },
 
-  /*
-   * HTML:
-   * flex flex-col gap-6 flex-grow
-   */
-  modeCardContainer: {
-    flexGrow: 1,
-    gap: 24,
+  screenSubtitleDesktop: {
+    fontSize: 19,
+    lineHeight: 30,
   },
 
-  /*
-   * HTML:
-   * p-gutter（16px）
-   * min-h-[220px]
-   * rounded-xl（12px）
+  screenSubtitleMobile: {
+    fontSize: 17,
+    lineHeight: 26,
+  },
+
+  /**
+   * モードカード
    */
-  modeCard: {
+  modeCardContainer: {
     width: '100%',
-    minHeight: 220,
-    padding: 16,
+  },
+
+  modeCardContainerDesktop: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    justifyContent: 'center',
+    gap: 28,
+  },
+
+  modeCardContainerMobile: {
+    flexDirection: 'column',
+    gap: 20,
+  },
+
+  modeCard: {
+    minHeight: 330,
+    paddingHorizontal: 28,
+    paddingVertical: 32,
     borderWidth: 1,
-    borderColor: COLORS.outlineVariant,
-    borderRadius: 12,
+    borderColor:
+      COLORS.outlineVariant,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
 
-    elevation: 2,
-
-    shadowColor: '#000000',
+    shadowColor: COLORS.shadow,
     shadowOffset: {
       width: 0,
-      height: 1,
+      height: 4,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowRadius: 12,
+
+    elevation: 3,
+  },
+
+  modeCardDesktop: {
+    flex: 1,
+    maxWidth: 520,
+  },
+
+  modeCardMobile: {
+    width: '100%',
   },
 
   modeCardDefault: {
-    backgroundColor: COLORS.surfaceContainerLow,
-    transform: [{ scale: 1 }],
+    backgroundColor:
+      COLORS.surfaceContainerLow,
+    transform: [
+      {
+        scale: 1,
+      },
+    ],
   },
 
   modeCardPressed: {
-    backgroundColor: COLORS.secondaryContainer,
-    transform: [{ scale: 0.97 }],
+    backgroundColor:
+      COLORS.secondaryContainer,
+    transform: [
+      {
+        scale: 0.98,
+      },
+    ],
   },
 
   iconRow: {
-    marginBottom: 16,
+    marginBottom: 24,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 16,
+    gap: 18,
   },
 
-  /*
-   * HTML:
-   * w-16 h-16 rounded-full
-   */
   iconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   primaryIconCircle: {
-    backgroundColor: COLORS.primaryFixed,
+    backgroundColor:
+      COLORS.primaryFixed,
   },
 
   secondaryIconCircle: {
-    backgroundColor: COLORS.secondaryFixed,
+    backgroundColor:
+      COLORS.secondaryFixed,
   },
 
   modeTextContainer: {
@@ -612,108 +950,183 @@ const styles = StyleSheet.create({
   },
 
   modeTitle: {
-    marginBottom: 12,
+    marginBottom: 14,
     color: COLORS.primary,
-    fontFamily: 'sans-serif',
-    fontSize: 20,
+    fontFamily: Platform.select({
+      web: 'system-ui',
+      default: 'sans-serif',
+    }),
+    fontSize: 23,
     fontWeight: '700',
-    lineHeight: 28,
+    lineHeight: 31,
     textAlign: 'center',
   },
 
   modeDescription: {
-    paddingHorizontal: 16,
+    maxWidth: 420,
     color: COLORS.onSurfaceVariant,
-    fontFamily: 'sans-serif',
-    fontSize: 18,
+    fontFamily: Platform.select({
+      web: 'system-ui',
+      default: 'sans-serif',
+    }),
+    fontSize: 17,
     fontWeight: '400',
     lineHeight: 28,
     textAlign: 'center',
   },
 
-  decorativeArea: {
-    marginTop: 'auto',
-    paddingTop: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    opacity: 0.4,
-  },
-
-  decorativeLine: {
-    width: 128,
-    height: 4,
+  cardActionRow: {
+    marginTop: 28,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
     borderRadius: 999,
-    backgroundColor: COLORS.surfaceVariant,
-  },
-
-  /*
-   * HTML:
-   * fixed bottom-0
-   * h-[80px]
-   */
-  bottomNavigation: {
-    height: 80,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.outlineVariant,
-    backgroundColor: COLORS.surface,
+    backgroundColor:
+      COLORS.secondaryContainer,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
+  },
 
-    elevation: 12,
+  cardActionText: {
+    marginRight: 8,
+    color: COLORS.primary,
+    fontFamily: Platform.select({
+      web: 'system-ui',
+      default: 'sans-serif',
+    }),
+    fontSize: 15,
+    fontWeight: '700',
+    lineHeight: 22,
+  },
 
-    shadowColor: '#000000',
+  /**
+   * Webカメラについての補足
+   */
+  informationCard: {
+    width: '100%',
+    maxWidth: 760,
+    marginTop: 36,
+    marginBottom: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 18,
+    alignSelf: 'center',
+    borderWidth: 1,
+    borderColor:
+      COLORS.outlineVariant,
+    borderRadius: 14,
+    backgroundColor:
+      COLORS.surfaceContainer,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+
+  informationText: {
+    flex: 1,
+    marginLeft: 12,
+    color: COLORS.onSurfaceVariant,
+    fontFamily: Platform.select({
+      web: 'system-ui',
+      default: 'sans-serif',
+    }),
+    fontSize: 15,
+    fontWeight: '400',
+    lineHeight: 24,
+  },
+
+  /**
+   * 下部ナビゲーション
+   */
+  bottomNavigation: {
+    borderTopWidth: 1,
+    borderTopColor:
+      COLORS.outlineVariant,
+    backgroundColor: COLORS.surface,
+
+    shadowColor: COLORS.shadow,
     shadowOffset: {
       width: 0,
       height: -2,
     },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.06,
     shadowRadius: 4,
+
+    elevation: 8,
   },
 
-  bottomNavigationItem: {
-    minWidth: 64,
-    minHeight: 56,
+  bottomNavigationInner: {
+    width: '100%',
+    maxWidth: WEB_CONTENT_MAX_WIDTH,
+    minHeight: 76,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+
+  bottomNavigationInnerDesktop: {
+    paddingHorizontal: 120,
+  },
+
+  bottomNavigationInnerMobile: {
+    paddingHorizontal: 8,
+  },
+
+  navigationItem: {
+    minWidth: 68,
+    minHeight: 54,
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 7,
+    borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  bottomNavigationItemSelected: {
-    minWidth: 96,
-    borderRadius: 999,
-    backgroundColor: COLORS.secondaryContainer,
+  navigationItemSelected: {
+    backgroundColor:
+      COLORS.secondaryContainer,
   },
 
-  bottomNavigationItemUnselected: {
-    borderRadius: 12,
+  navigationItemUnselected: {
     backgroundColor: 'transparent',
   },
 
-  bottomNavigationItemPressed: {
-    backgroundColor: COLORS.primaryFixed,
+  navigationItemPressed: {
+    backgroundColor:
+      COLORS.primaryFixed,
+    transform: [
+      {
+        scale: 0.97,
+      },
+    ],
   },
 
-  bottomNavigationItemNotPressed: {
-    opacity: 1,
+  navigationItemIdle: {
+    transform: [
+      {
+        scale: 1,
+      },
+    ],
   },
 
-  bottomNavigationLabel: {
-    marginTop: 1,
-    fontFamily: 'sans-serif',
-    fontSize: 16,
+  navigationLabel: {
+    marginTop: 2,
+    fontFamily: Platform.select({
+      web: 'system-ui',
+      default: 'sans-serif',
+    }),
+    fontSize: 14,
     fontWeight: '600',
-    lineHeight: 20,
-    letterSpacing: 0.1,
+    lineHeight: 19,
     textAlign: 'center',
   },
 
-  bottomNavigationLabelSelected: {
-    color: COLORS.onSecondaryContainer,
+  navigationLabelSelected: {
+    color:
+      COLORS.onSecondaryContainer,
   },
 
-  bottomNavigationLabelUnselected: {
-    color: COLORS.onSurfaceVariant,
+  navigationLabelUnselected: {
+    color:
+      COLORS.onSurfaceVariant,
   },
 });
