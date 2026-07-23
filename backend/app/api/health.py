@@ -1,30 +1,47 @@
-from fastapi import APIRouter, HTTPException
-from sqlalchemy import text
-from sqlalchemy.exc import SQLAlchemyError
+"""アプリケーションの稼働状態を確認するAPI。"""
 
-from app.dependencies.database import DatabaseSession
+from fastapi import APIRouter, Response, status
+
+from app.config import settings
+from app.database import is_database_available
+from app.schemas.common import HealthCheckResponse
 
 
 router = APIRouter(
-    prefix="/api/v1/health",
-    tags=["health"],
+    prefix="/api",
+    tags=["Health"],
 )
 
 
-@router.get("/database")
-def database_health(
-    db: DatabaseSession,
-) -> dict[str, str]:
-    try:
-        db.execute(text("SELECT 1"))
+@router.get(
+    "/health",
+    response_model=HealthCheckResponse,
+    status_code=status.HTTP_200_OK,
+    summary="APIとSQLiteの稼働状態を確認する",
+)
+def health_check(response: Response) -> HealthCheckResponse:
+    """APIとSQLiteデータベースの稼働状態を返す。
 
-        return {
-            "status": "ok",
-            "database": "connected",
-        }
+    SQLiteへ接続できる場合はHTTP 200を返す。
+    SQLiteへ接続できない場合はHTTP 503を返す。
+    """
+    database_available: bool = is_database_available()
 
-    except SQLAlchemyError as exc:
-        raise HTTPException(
-            status_code=503,
-            detail="Database connection unavailable",
-        ) from exc
+    if not database_available:
+        response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+
+        return HealthCheckResponse(
+            status="degraded",
+            api="available",
+            database="unavailable",
+            environment=settings.app_env,
+            version=settings.app_version,
+        )
+
+    return HealthCheckResponse(
+        status="ok",
+        api="available",
+        database="available",
+        environment=settings.app_env,
+        version=settings.app_version,
+    )
