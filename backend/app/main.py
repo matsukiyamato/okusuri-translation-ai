@@ -3,6 +3,7 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 import logging
+from app.api.ocr import router as ocr_router
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,6 +11,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.health import router as health_router
 from app.config import settings
 from app.database import create_database, dispose_database
+from app.api.health import router as health_router
+from app.api.ocr import router as ocr_router
+
 
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -44,7 +48,7 @@ app.add_middleware(
 )
 
 app.include_router(health_router)
-
+app.include_router(ocr_router)
 
 @app.get("/")
 async def root() -> dict[str, str]:
