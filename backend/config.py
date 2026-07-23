@@ -1,102 +1,40 @@
-"""アプリケーション設定を管理するモジュール。"""
+from functools import lru_cache
 
-from __future__ import annotations
-
-import os
-from dataclasses import dataclass
-from pathlib import Path
-
-from dotenv import load_dotenv
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-BACKEND_DIR = Path(__file__).resolve().parent
-ENV_FILE = BACKEND_DIR / ".env"
+class Settings(BaseSettings):
+    app_env: str = Field(default="development", alias="APP_ENV")
 
-load_dotenv(dotenv_path=ENV_FILE)
+    mysql_host: str = Field(default="127.0.0.1", alias="MYSQL_HOST")
+    mysql_port: int = Field(default=3306, alias="MYSQL_PORT")
+    mysql_database: str = Field(alias="MYSQL_DATABASE")
+    mysql_user: str = Field(alias="MYSQL_USER")
+    mysql_password: str = Field(alias="MYSQL_PASSWORD")
 
-
-def get_required_env(name: str) -> str:
-    """必須の環境変数を取得する。"""
-    value = os.getenv(name)
-
-    if value is None or not value.strip():
-        raise RuntimeError(
-            f"必須の環境変数が設定されていません: {name}"
-        )
-
-    return value.strip()
-
-
-def get_int_env(
-    name: str,
-    default: int,
-    minimum: int = 0,
-) -> int:
-    """整数形式の環境変数を取得する。"""
-    raw_value = os.getenv(name, str(default))
-
-    try:
-        value = int(raw_value)
-    except ValueError as exc:
-        raise RuntimeError(
-            f"{name}には整数を設定してください: {raw_value!r}"
-        ) from exc
-
-    if value < minimum:
-        raise RuntimeError(
-            f"{name}には{minimum}以上の値を設定してください"
-        )
-
-    return value
-
-
-@dataclass(frozen=True)
-class Settings:
-    """アプリケーション設定。"""
-
-    app_env: str
-
-    mysql_host: str
-    mysql_port: int
-    mysql_database: str
-    mysql_user: str
-    mysql_password: str
-
-    mysql_pool_size: int
-    mysql_max_overflow: int
-    mysql_pool_recycle: int
-    mysql_connect_timeout: int
-
-
-settings = Settings(
-    app_env=os.getenv("APP_ENV", "development"),
-    mysql_host=get_required_env("MYSQL_HOST"),
-    mysql_port=get_int_env(
-        "MYSQL_PORT",
-        default=3306,
-        minimum=1,
-    ),
-    mysql_database=get_required_env("MYSQL_DATABASE"),
-    mysql_user=get_required_env("MYSQL_USER"),
-    mysql_password=get_required_env("MYSQL_PASSWORD"),
-    mysql_pool_size=get_int_env(
-        "MYSQL_POOL_SIZE",
+    mysql_pool_size: int = Field(default=5, alias="MYSQL_POOL_SIZE")
+    mysql_max_overflow: int = Field(
         default=5,
-        minimum=1,
-    ),
-    mysql_max_overflow=get_int_env(
-        "MYSQL_MAX_OVERFLOW",
-        default=5,
-        minimum=0,
-    ),
-    mysql_pool_recycle=get_int_env(
-        "MYSQL_POOL_RECYCLE",
+        alias="MYSQL_MAX_OVERFLOW",
+    )
+    mysql_pool_recycle: int = Field(
         default=1800,
-        minimum=1,
-    ),
-    mysql_connect_timeout=get_int_env(
-        "MYSQL_CONNECT_TIMEOUT",
+        alias="MYSQL_POOL_RECYCLE",
+    )
+    mysql_connect_timeout: int = Field(
         default=10,
-        minimum=1,
-    ),
-)
+        alias="MYSQL_CONNECT_TIMEOUT",
+    )
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()

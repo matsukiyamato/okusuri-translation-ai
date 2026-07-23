@@ -8,7 +8,6 @@ import React, {
   type ComponentProps,
 } from 'react';
 import {
-  Alert,
   Animated,
   Pressable,
   SafeAreaView,
@@ -83,7 +82,7 @@ const COLORS = {
 } as const;
 
 const VIEWPORT_HORIZONTAL_MARGIN = 16;
-const VIEWPORT_MAX_WIDTH = 1000;
+const VIEWPORT_MAX_WIDTH = 400;
 const SCAN_DURATION_MS = 3000;
 const CAPTURE_FLASH_DURATION_MS = 100;
 
@@ -327,45 +326,32 @@ const CameraCaptureScreen = ({
       }
 
       /*
-      * 撮影した画像URIをOcrVerificationScreenへ渡します。
-      *
-      * Webでは画像を表すURI、
-      * Androidでは一時的なローカルファイルURIが渡されます。
-      *
-      * 現段階では画面表示に使用し、
-      * Step 8でFastAPIへの画像送信にも使用します。
-      */
+       * 現在のRootStackParamListではOcrVerificationへ渡す値が
+       * displayModeのみのため、現段階では画面遷移だけ行います。
+       *
+       * OCR実装時にはRootStackParamListを次の形へ変更します。
+       *
+       * OcrVerification: {
+       *   displayMode: TranslationDisplayMode;
+       *   capturedImageUri: string;
+       * };
+       */
       navigation.navigate('OcrVerification', {
         displayMode,
-        capturedImageUri: capturedPicture.uri,
       });
-    } catch (error: unknown) {
-  if (__DEV__) {
-    console.error('Camera capture failed:', error);
-  }
 
-  Alert.alert(
-    '撮影に失敗しました',
-    'カメラを確認して、もう一度撮影してください。',
-    [
-      {
-        text: '閉じる',
-        style: 'cancel',
-      },
-      {
-        text: 'もう一度撮影',
-        onPress: (): void => {
-          setIsCameraReady(true);
-        },
-      },
-    ],
-    {
-      cancelable: true,
-    },
-  );
-} finally {
-  setIsCapturing(false);
-}
+      /*
+       * FastAPI接続時に使用する画像URI:
+       * capturedPicture.uri
+       *
+       * FormDataへ変換し、OCR APIへ送信できます。
+       */
+      void capturedPicture.uri;
+    } catch {
+      setIsCameraReady(false);
+    } finally {
+      setIsCapturing(false);
+    }
   }, [
     displayMode,
     isCameraReady,
@@ -741,8 +727,8 @@ const styles = StyleSheet.create({
 
   viewportWrapper: {
     width: '100%',
-    maxWidth: 620, //620じゃないと他の表示されているところが表示されなくなる。→枠組みで欲しい部分だけ撮れているのでOK
-    aspectRatio: 1.75,
+    maxWidth: VIEWPORT_MAX_WIDTH,
+    aspectRatio: 3 / 4,
   },
 
   viewport: {
