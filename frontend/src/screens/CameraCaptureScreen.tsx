@@ -8,8 +8,10 @@ import React, {
   type ComponentProps,
 } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Animated,
+  Platform,
   Pressable,
   SafeAreaView,
   StatusBar,
@@ -31,12 +33,19 @@ import {
   type CameraCapturedPicture,
 } from 'expo-camera';
 
-import type { RootStackParamList } from './ModeSelectionScreen';
+import type { ImageUploadResult, RootStackParamList } from '../navigation/AppNavigator';
 
 type CameraCaptureScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'CameraCapture'
 >;
+type SupportedImageMimeType =
+  | 'image/jpeg'
+  | 'image/png'
+  | 'image/webp';
+
+type CameraImageFormat =
+  CameraCapturedPicture['format'];
 
 type MaterialIconName = ComponentProps<typeof MaterialIcons>['name'];
 
@@ -82,10 +91,13 @@ const COLORS = {
   whiteFrame: 'rgba(255, 255, 255, 0.90)',
 } as const;
 
-const VIEWPORT_HORIZONTAL_MARGIN = 16;
-const VIEWPORT_MAX_WIDTH = 1000;
+const VIEWPORT_HORIZONTAL_MARGIN = 8;
+const VIEWPORT_MAX_WIDTH = 900;
 const SCAN_DURATION_MS = 3000;
 const CAPTURE_FLASH_DURATION_MS = 100;
+
+// APIの接続先ベースURL（開発用）
+const API_BASE_URL = 'http://localhost:8000';
 
 /**
  * 上部カメラ操作ボタン。
@@ -226,6 +238,7 @@ const CameraCaptureScreen = ({
   const [permission, requestPermission] = useCameraPermissions();
   const [isCameraReady, setIsCameraReady] = useState<boolean>(false);
   const [isCapturing, setIsCapturing] = useState<boolean>(false);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isTorchEnabled, setIsTorchEnabled] = useState<boolean>(false);
   const [viewportHeight, setViewportHeight] = useState<number>(0);
 
@@ -301,11 +314,49 @@ const CameraCaptureScreen = ({
     ]).start();
   }, [captureFlashOpacity]);
 
+  /**
+   * 画像URIからFormDataを構築してFastAPIへ送信する関数 (Step 8)
+   */
+  const uploadImageToFastApi = useCallback(
+    async (imageUri: string): Promise<ImageUploadResult> => {
+      const formData = new FormData();
+
+      if (Platform.OS === 'web') {
+        const response = await fetch(imageUri);
+        const blob = await response.blob();
+        formData.append('image', blob, 'upload.jpg');
+      } else {
+        const fileObj = {
+          uri: imageUri,
+          name: 'upload.jpg',
+          type: 'image/jpeg',
+        };
+        // React Native標準のFormData型定義用キャスト
+        formData.append('image', fileObj as unknown as Blob);
+      }
+
+      const apiResponse = await fetch(`${API_BASE_URL}/api/ocr/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!apiResponse.ok) {
+        const errorText = await apiResponse.text();
+        throw new Error(`Upload failed with status ${apiResponse.status}: ${errorText}`);
+      }
+
+      const result: ImageUploadResult = await apiResponse.json();
+      return result;
+    },
+    [],
+  );
+
   const handleCapturePress = useCallback(async (): Promise<void> => {
     if (
       cameraRef.current === null ||
       !isCameraReady ||
-      isCapturing
+      isCapturing ||
+      isUploading
     ) {
       return;
     }
@@ -317,61 +368,61 @@ const CameraCaptureScreen = ({
       Vibration.vibrate(50);
 
       const capturedPicture: CameraCapturedPicture | undefined =
-        await cameraRef.current.takePictureAsync({
-          quality: 0.9,
-          skipProcessing: false,
-        });
+        await cameraRef.current.takePictureAsync(
+          Platform.OS === 'web'
+            ? {
+                quality: 1,
+                scale: 1,
+                skipProcessing: false,
+        }
+      : {
+                quality: 1,
+                skipProcessing: false,
+        },
+  );
 
       if (capturedPicture === undefined) {
+        setIsCapturing(false);
         return;
       }
 
-      /*
-      * 撮影した画像URIをOcrVerificationScreenへ渡します。
-      *
-      * Webでは画像を表すURI、
-      * Androidでは一時的なローカルファイルURIが渡されます。
-      *
-      * 現段階では画面表示に使用し、
-      * Step 8でFastAPIへの画像送信にも使用します。
-      */
+      setIsUploading(true);
+
+      // Step 8: 画像をFastAPIサーバーへ通信して送信
+      const uploadResult = await uploadImageToFastApi(capturedPicture.uri);
+
       navigation.navigate('OcrVerification', {
         displayMode,
         capturedImageUri: capturedPicture.uri,
+        uploadResult,
       });
     } catch (error: unknown) {
-  if (__DEV__) {
-    console.error('Camera capture failed:', error);
-  }
+      if (__DEV__) {
+        console.error('Camera capture or upload failed:', error);
+      }
 
-  Alert.alert(
-    '撮影に失敗しました',
-    'カメラを確認して、もう一度撮影してください。',
-    [
-      {
-        text: '閉じる',
-        style: 'cancel',
-      },
-      {
-        text: 'もう一度撮影',
-        onPress: (): void => {
-          setIsCameraReady(true);
-        },
-      },
-    ],
-    {
-      cancelable: true,
-    },
-  );
-} finally {
-  setIsCapturing(false);
-}
+      Alert.alert(
+        '送信エラー',
+        '画像の送信に失敗しました。サーバーの起動状態を確認の上、再度お試しください。',
+        [
+          {
+            text: '閉じる',
+            style: 'cancel',
+          },
+        ],
+      );
+    } finally {
+      setIsCapturing(false);
+      setIsUploading(false);
+    }
   }, [
     displayMode,
     isCameraReady,
     isCapturing,
+    isUploading,
     navigation,
     showCaptureFlash,
+    uploadImageToFastApi,
   ]);
 
   const handleHelpPress = useCallback((): void => {
@@ -383,12 +434,12 @@ const CameraCaptureScreen = ({
   const getShutterStyle = useCallback(
     ({ pressed }: PressableStateCallbackType): StyleProp<ViewStyle> => [
       styles.shutterRing,
-      pressed || isCapturing
+      pressed || isCapturing || isUploading
         ? styles.shutterRingPressed
         : styles.shutterRingDefault,
-      !isCameraReady && styles.shutterRingDisabled,
+      (!isCameraReady || isUploading) && styles.shutterRingDisabled,
     ],
-    [isCameraReady, isCapturing],
+    [isCameraReady, isCapturing, isUploading],
   );
 
   const scanLineTranslateY = scanProgress.interpolate({
@@ -559,16 +610,20 @@ const CameraCaptureScreen = ({
               accessibilityLabel="撮影する"
               accessibilityRole="button"
               accessibilityState={{
-                busy: isCapturing,
-                disabled: !isCameraReady || isCapturing,
+                busy: isCapturing || isUploading,
+                disabled: !isCameraReady || isCapturing || isUploading,
               }}
-              disabled={!isCameraReady || isCapturing}
+              disabled={!isCameraReady || isCapturing || isUploading}
               onPress={() => {
                 void handleCapturePress();
               }}
               style={getShutterStyle}
             >
-              <View style={styles.shutterCenter} />
+              {isUploading ? (
+                <ActivityIndicator color={COLORS.primary} size="small" />
+              ) : (
+                <View style={styles.shutterCenter} />
+              )}
             </Pressable>
 
             <Pressable
@@ -741,8 +796,8 @@ const styles = StyleSheet.create({
 
   viewportWrapper: {
     width: '100%',
-    maxWidth: 620, //620じゃないと他の表示されているところが表示されなくなる。→枠組みで欲しい部分だけ撮れているのでOK
-    aspectRatio: 1.75,
+    maxWidth: 900,
+    aspectRatio: 1.25,
   },
 
   viewport: {

@@ -14,17 +14,49 @@ import SignLanguageResultScreen from '../screens/SignLanguageResultScreen';
 import TextAudioResultScreen from '../screens/TextAudioResultScreen';
 
 import type {
-  RootStackParamList,
+  RootStackParamList as BaseRootStackParamList,
   TranslationDisplayMode,
 } from '../screens/ModeSelectionScreen';
 
 /**
- * 既存画面との互換性維持
+ * FastAPIの画像アップロードAPIが返すデータ形式。
+ *
+ * POST /api/ocr/upload
+ */
+export type ImageUploadResult = {
+  status: 'accepted';
+  upload_id: string;
+  filename: string;
+  content_type:
+    | 'image/jpeg'
+    | 'image/png'
+    | 'image/webp';
+  size_bytes: number;
+  message: string;
+  raw_text: string;
+};
+
+/**
+ * ModeSelectionScreen.tsxで定義されている既存の画面遷移型を維持しつつ、
+ * OcrVerification画面に画像アップロード結果を追加する。
+ */
+export type RootStackParamList =
+  Omit<
+    BaseRootStackParamList,
+    'OcrVerification'
+  > & {
+    OcrVerification:
+      BaseRootStackParamList['OcrVerification'] & {
+        uploadResult: ImageUploadResult;
+      };
+  };
+
+/**
+ * 既存画面との互換性維持。
  */
 export type {
-  RootStackParamList,
   TranslationDisplayMode,
-} from '../screens/ModeSelectionScreen';
+};
 
 const Stack =
   createNativeStackNavigator<RootStackParamList>();
@@ -35,11 +67,8 @@ export default function AppNavigator(): React.JSX.Element {
       initialRouteName="ModeSelection"
       screenOptions={{
         headerShown: false,
-
         gestureEnabled: true,
-
         animation: 'slide_from_right',
-
         contentStyle: {
           backgroundColor: '#F6FAFA',
         },
