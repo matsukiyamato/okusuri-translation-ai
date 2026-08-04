@@ -3,32 +3,36 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 import logging
-from app.api.ocr import router as ocr_router
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.health import router as health_router
+from app.api.ocr import router as ocr_router
 from app.config import settings
 from app.database import create_database, dispose_database
-from app.api.health import router as health_router
-from app.api.ocr import router as ocr_router
-
 
 
 logger: logging.Logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+async def lifespan(
+    _app: FastAPI,
+) -> AsyncIterator[None]:
     """FastAPIの起動処理と終了処理を管理する。"""
+
     create_database()
-    logger.info("SQLite database initialization completed")
+    logger.info(
+        "SQLite database initialization completed"
+    )
 
     yield
 
     dispose_database()
-    logger.info("SQLite database resources disposed")
+    logger.info(
+        "SQLite database resources disposed"
+    )
 
 
 app = FastAPI(
@@ -50,10 +54,14 @@ app.add_middleware(
 app.include_router(health_router)
 app.include_router(ocr_router)
 
+
 @app.get("/")
 async def root() -> dict[str, str]:
     """FastAPIサーバーの起動状態を返す。"""
+
     return {
-        "message": "Okusuri Translation AI API is running",
+        "message": (
+            "Okusuri Translation AI API is running"
+        ),
         "status": "ok",
     }

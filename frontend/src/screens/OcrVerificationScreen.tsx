@@ -34,7 +34,7 @@ import type {
 
 import type {
   RootStackParamList,
-} from './ModeSelectionScreen';
+} from '../navigation/AppNavigator';
 
 type OcrVerificationScreenProps =
   NativeStackScreenProps<
@@ -150,9 +150,6 @@ const HeaderButton = ({
 
 /**
  * OCR結果の編集フィールド。
- *
- * ファイル数を増やさない条件に合わせて、
- * この画面内の内部コンポーネントとして定義します。
  */
 const FieldSection = ({
   label,
@@ -299,17 +296,12 @@ const OcrVerificationScreen = ({
   const {
     displayMode,
     capturedImageUri,
+    uploadResult,
   } = route.params;
 
   const isDesktopLayout =
     width >= DESKTOP_BREAKPOINT;
 
-  /**
-   * FastAPI接続前の仮OCR結果。
-   *
-   * FastAPI接続後は、APIレスポンスで
-   * medicineNameとdosageを更新します。
-   */
   const [medicineName, setMedicineName] =
     useState<string>(
       'ロキソプロフェンナトリウム',
@@ -328,12 +320,6 @@ const OcrVerificationScreen = ({
       new Animated.Value(0),
     ).current;
 
-  /**
-   * OCR処理中を表現するスキャンライン。
-   *
-   * 現段階では画面表現のみです。
-   * FastAPI接続後はAPI通信中だけ動かす設計に変更できます。
-   */
   useEffect(() => {
     const scanAnimation =
       Animated.loop(
@@ -385,9 +371,6 @@ const OcrVerificationScreen = ({
       navigation.goBack();
     }, [navigation]);
 
-  /**
-   * 再撮影時はCameraCaptureへ戻します。
-   */
   const handleRetake =
     useCallback((): void => {
       navigation.navigate(
@@ -401,9 +384,6 @@ const OcrVerificationScreen = ({
       navigation,
     ]);
 
-  /**
-   * 撮影方法の確認画面へ移動します。
-   */
   const handleHelpPress =
     useCallback((): void => {
       navigation.navigate(
@@ -417,10 +397,6 @@ const OcrVerificationScreen = ({
       navigation,
     ]);
 
-  /**
-   * 選択されたモードに応じて、
-   * 最終表示画面を切り替えます。
-   */
   const handleConfirm =
     useCallback((): void => {
       const normalizedMedicineName =
@@ -808,12 +784,13 @@ const OcrVerificationScreen = ({
                   </View>
                 </View>
 
+                {/* APIから受信した情報を表示 */}
                 <View style={styles.imageInformationCard}>
                   <MaterialIcons
                     accessibilityElementsHidden
                     color={COLORS.primary}
                     importantForAccessibility="no-hide-descendants"
-                    name="lock"
+                    name="cloud-done"
                     size={22}
                   />
 
@@ -822,8 +799,7 @@ const OcrVerificationScreen = ({
                       styles.imageInformationText
                     }
                   >
-                    現段階では画像をブラウザ内で保持しています。
-                    FastAPI接続後は、この画像をOCR APIへ送信します。
+                    アップロード完了: ID {uploadResult?.upload_id ?? 'N/A'} ({uploadResult?.size_bytes ?? 0} bytes)
                   </Text>
                 </View>
               </View>
@@ -1025,9 +1001,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
   },
 
-  /**
-   * ヘッダー
-   */
   header: {
     zIndex: 50,
     minHeight: 68,
@@ -1130,9 +1103,6 @@ const styles = StyleSheet.create({
     lineHeight: 17,
   },
 
-  /**
-   * メインコンテンツ
-   */
   scrollContent: {
     flexGrow: 1,
     width: '100%',
@@ -1233,9 +1203,6 @@ const styles = StyleSheet.create({
     lineHeight: 25,
   },
 
-  /**
-   * 2カラム
-   */
   verificationLayout: {
     width: '100%',
   },
@@ -1308,9 +1275,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
 
-  /**
-   * 画像プレビュー
-   */
   previewContainer: {
     position: 'relative',
     width: '100%',
@@ -1496,7 +1460,7 @@ const styles = StyleSheet.create({
     backgroundColor:
       COLORS.surfaceContainerLow,
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
 
   imageInformationText: {
@@ -1508,13 +1472,10 @@ const styles = StyleSheet.create({
       default: 'sans-serif',
     }),
     fontSize: 13,
-    fontWeight: '400',
+    fontWeight: '600',
     lineHeight: 21,
   },
 
-  /**
-   * OCR結果カード
-   */
   resultCard: {
     width: '100%',
     padding: 24,
@@ -1763,9 +1724,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
 
-  /**
-   * アクションボタン
-   */
   actionArea: {
     width: '100%',
     marginTop: 20,
