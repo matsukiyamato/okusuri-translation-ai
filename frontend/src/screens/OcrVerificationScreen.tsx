@@ -299,18 +299,85 @@ const OcrVerificationScreen = ({
     uploadResult,
   } = route.params;
 
+  const structuredData =
+    uploadResult.ocr_result.structured_data;
+
   const isDesktopLayout =
     width >= DESKTOP_BREAKPOINT;
 
   const [medicineName, setMedicineName] =
     useState<string>(
-      'ロキソプロフェンナトリウム',
+      structuredData?.medicine_name ?? '',
     );
 
   const [dosage, setDosage] =
     useState<string>(
-      '1回1錠、1日3回 食後',
+      structuredData?.dosage_original_text ?? '',
     );
+  
+  const [timingText, setTimingText] =
+  useState<string>(
+    structuredData?.timing.original_text ?? '',
+  );
+
+  const [timesPerDay, setTimesPerDay] =
+    useState<string>(
+      structuredData?.times_per_day != null
+        ? String(structuredData.times_per_day)
+        : '',
+    );
+
+  const [tabletsPerDose, setTabletsPerDose] =
+    useState<string>(
+      structuredData?.tablets_per_dose != null
+        ? String(structuredData.tablets_per_dose)
+        : '',
+    );
+
+  const [numberOfDays, setNumberOfDays] =
+    useState<string>(
+      structuredData?.number_of_days != null
+        ? String(structuredData.number_of_days)
+        : '',
+    );
+
+  const [
+    medicineInformation,
+    setMedicineInformation,
+  ] = useState<string>(
+    structuredData?.medicine_information.join('\n') ?? '',
+  );
+
+  const [precautions, setPrecautions] =
+    useState<string>(
+      structuredData?.precautions.join('\n') ?? '',
+    );
+
+  const [interactions, setInteractions] =
+    useState<string>(
+      structuredData?.interactions.join('\n') ?? '',
+    );
+
+  const [sideEffects, setSideEffects] =
+    useState<string>(
+      structuredData?.side_effects.join('\n') ?? '',
+    );
+
+  const [
+    unclassifiedText,
+    setUnclassifiedText,
+  ] = useState<string>(
+    structuredData?.unclassified_text.join('\n') ?? '',
+  );
+
+  const medicineNameCandidates: string[] =
+    structuredData?.medicine_name_candidates ?? [];
+
+  const warnings: string[] =
+    structuredData?.warnings ?? [];
+
+  const requiresUserReview: boolean =
+    structuredData?.requires_user_review ?? true;
 
   const [previewHeight, setPreviewHeight] =
     useState<number>(0);
@@ -329,7 +396,7 @@ const OcrVerificationScreen = ({
             {
               toValue: 1,
               duration:
-                SCAN_DURATION_MS,
+              SCAN_DURATION_MS,
               useNativeDriver: false,
             },
           ),
@@ -877,24 +944,128 @@ const OcrVerificationScreen = ({
                     </View>
                   </View>
 
-                  <View style={styles.fieldList}>
-                    <FieldSection
-                      label="お薬名（Medicine Name）"
-                      onChangeText={
-                        setMedicineName
-                      }
-                      placeholder="お薬名を入力してください"
-                      value={medicineName}
-                    />
+                    <View style={styles.fieldList}>
+                <FieldSection
+                  label="お薬名"
+                  onChangeText={setMedicineName}
+                  placeholder="読み取れなかった場合は空欄"
+                  value={medicineName}
+                />
 
-                    <FieldSection
-                      label="用法・用量（Dosage）"
-                      multiline
-                      onChangeText={setDosage}
-                      placeholder="用法・用量を入力してください"
-                      value={dosage}
-                    />
-                  </View>
+                <FieldSection
+                  label="服用タイミング"
+                  multiline
+                  onChangeText={setTimingText}
+                  placeholder="読み取れなかった場合は空欄"
+                  value={timingText}
+                />
+
+                <FieldSection
+                  label="1日の服用回数"
+                  onChangeText={setTimesPerDay}
+                  placeholder="読み取れなかった場合は空欄"
+                  value={timesPerDay}
+                />
+
+                <FieldSection
+                  label="1回の錠数"
+                  onChangeText={setTabletsPerDose}
+                  placeholder="読み取れなかった場合は空欄"
+                  value={tabletsPerDose}
+                />
+
+                <FieldSection
+                  label="何日分"
+                  onChangeText={setNumberOfDays}
+                  placeholder="読み取れなかった場合は空欄"
+                  value={numberOfDays}
+                />
+
+                <FieldSection
+                  label="用法・用量の原文"
+                  multiline
+                  onChangeText={setDosage}
+                  placeholder="読み取れなかった場合は空欄"
+                  value={dosage}
+                />
+
+                <FieldSection
+                  label="薬のはたらき"
+                  multiline
+                  onChangeText={setMedicineInformation}
+                  placeholder="読み取れなかった場合は空欄"
+                  value={medicineInformation}
+                />
+
+                <FieldSection
+                  label="注意事項"
+                  multiline
+                  onChangeText={setPrecautions}
+                  placeholder="読み取れなかった場合は空欄"
+                  value={precautions}
+                />
+
+                <FieldSection
+                  label="相互作用"
+                  multiline
+                  onChangeText={setInteractions}
+                  placeholder="読み取れなかった場合は空欄"
+                  value={interactions}
+                />
+
+                <FieldSection
+                  label="副作用"
+                  multiline
+                  onChangeText={setSideEffects}
+                  placeholder="読み取れなかった場合は空欄"
+                  value={sideEffects}
+                />
+              </View>
+
+                <FieldSection
+                  label="分類できなかった文章"
+                  multiline
+                  onChangeText={setUnclassifiedText}
+                  placeholder="読み取れなかった場合は空欄"
+                  value={unclassifiedText}
+                />
+              </View>
+
+              {medicineNameCandidates.length > 0 ? (
+                
+  <View style={styles.warningCard}>
+    <View style={styles.warningIconCircle}>
+      <MaterialIcons
+        accessibilityElementsHidden
+        color={COLORS.warningIcon}
+        importantForAccessibility="no-hide-descendants"
+        name="help-outline"
+        size={27}
+      />
+    </View>
+
+    <View style={styles.warningTextArea}>
+      <Text style={styles.warningTitle}>
+        お薬名の候補
+      </Text>
+
+      {medicineNameCandidates.map(
+        (
+          candidate: string,
+          index: number,
+        ): React.JSX.Element => (
+          <Text
+            key={`${candidate}-${index}`}
+            style={styles.warningText}
+          >
+            ・{candidate}
+          </Text>
+        ),
+      )}
+    </View>
+  </View>
+) : null}
+
 
                   {isConfirmDisabled ? (
                     <View style={styles.validationCard}>
@@ -916,29 +1087,45 @@ const OcrVerificationScreen = ({
                     </View>
                   ) : null}
 
-                  <View style={styles.warningCard}>
-                    <View style={styles.warningIconCircle}>
-                      <MaterialIcons
-                        accessibilityElementsHidden
-                        color={COLORS.warningIcon}
-                        importantForAccessibility="no-hide-descendants"
-                        name="warning-amber"
-                        size={27}
-                      />
-                    </View>
+                {requiresUserReview ? (
+  <View style={styles.warningCard}>
+    <View style={styles.warningIconCircle}>
+      <MaterialIcons
+        accessibilityElementsHidden
+        color={COLORS.warningIcon}
+        importantForAccessibility="no-hide-descendants"
+        name="warning-amber"
+        size={27}
+      />
+    </View>
 
-                    <View style={styles.warningTextArea}>
-                      <Text style={styles.warningTitle}>
-                        読み取り結果を確認してください
-                      </Text>
+    <View style={styles.warningTextArea}>
+      <Text style={styles.warningTitle}>
+        読み取り結果を確認してください
+      </Text>
 
-                      <Text style={styles.warningText}>
-                        OCRによる文字認識には誤りが含まれる可能性があります。
-                        表示された文字と撮影画像を比較してください。
-                      </Text>
-                    </View>
-                  </View>
-                </View>
+      {warnings.length > 0 ? (
+        warnings.map(
+          (
+            warning: string,
+            index: number,
+          ): React.JSX.Element => (
+            <Text
+              key={`${warning}-${index}`}
+              style={styles.warningText}
+            >
+              ・{warning}
+            </Text>
+          ),
+        )
+      ) : (
+        <Text style={styles.warningText}>
+          読み取り結果に確認が必要な項目があります。
+        </Text>
+      )}
+    </View>
+  </View>
+) : null}
 
                 {/* アクション */}
                 <View

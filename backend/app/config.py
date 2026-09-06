@@ -28,7 +28,7 @@ class Settings(BaseSettings):
 
     # Step 10：Gemini Structured Outputで使用するモデル
     # .envにGEMINI_MODELがあれば、その値で上書きされる
-    gemini_model: str = "gemini-2.5-flash"
+    gemini_model: str = "gemini-3.5-flash"
 
     # サービスアカウント方式へ変更する場合に使用
     google_application_credentials: str = Field(
