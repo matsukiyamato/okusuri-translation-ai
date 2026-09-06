@@ -18,6 +18,58 @@ import type {
   TranslationDisplayMode,
 } from '../screens/ModeSelectionScreen';
 
+export type MedicationTimingResult = {
+  waking: boolean | null;
+  morning: boolean | null;
+  noon: boolean | null;
+  evening: boolean | null;
+  bedtime: boolean | null;
+  original_text: string | null;
+};
+
+export type GeminiStructuredOcrResult = {
+  medicine_name: string | null;
+  medicine_name_candidates: string[];
+
+  timing: MedicationTimingResult;
+
+  times_per_day: number | null;
+  tablets_per_dose: number | null;
+  number_of_days: number | null;
+
+  dosage_original_text: string | null;
+
+  medicine_information: string[];
+  precautions: string[];
+  interactions: string[];
+  side_effects: string[];
+
+  unclassified_text: string[];
+  warnings: string[];
+
+  requires_user_review: boolean;
+};
+
+export type OcrResult = {
+  raw_text: string;
+
+  page_count: number;
+  block_count: number;
+  paragraph_count: number;
+  word_count: number;
+
+  average_confidence: number | null;
+  detected_languages: string[];
+  has_text: boolean;
+
+  quality_status:
+    | 'good'
+    | 'review_required'
+    | 'text_not_detected';
+
+  structured_data: GeminiStructuredOcrResult | null;
+};
+
 /**
  * FastAPIの画像アップロードAPIが返すデータ形式。
  *
@@ -33,7 +85,8 @@ export type ImageUploadResult = {
     | 'image/webp';
   size_bytes: number;
   message: string;
-  raw_text: string;
+  ///raw_text: string;
+  ocr_result: OcrResult;
 };
 
 /**
