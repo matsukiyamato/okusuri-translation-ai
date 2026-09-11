@@ -1,16 +1,118 @@
 """SQLiteデータベース接続とSQLAlchemyセッションを管理する。"""
 
 from collections.abc import Generator
+from datetime import datetime, timezone
 
-from sqlalchemy import Engine, create_engine, text
+from sqlalchemy import (
+    JSON,
+    DateTime,
+    Engine,
+    Float,
+    Integer,
+    String,
+    Text,
+    create_engine,
+    text,
+)
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Mapped,
+    Session,
+    mapped_column,
+    sessionmaker,
+)
 
 from app.config import settings
 
 
 class Base(DeclarativeBase):
     """すべてのSQLAlchemy ORMモデルが継承する基底クラス。"""
+
+
+class OcrCorrection(Base):
+    """利用者が確認・修正したOCR結果を保存するORMモデル。"""
+
+    __tablename__ = "ocr_corrections"
+
+    id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+        autoincrement=True,
+    )
+
+    upload_id: Mapped[str] = mapped_column(
+        String(36),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+
+    raw_text: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    medicine_name: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    timing_original_text: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    times_per_day: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    tablets_per_dose: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    number_of_days: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    dosage_original_text: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    medicine_information: Mapped[list[str]] = mapped_column(
+        JSON,
+        nullable=False,
+    )
+
+    precautions: Mapped[list[str]] = mapped_column(
+        JSON,
+        nullable=False,
+    )
+
+    interactions: Mapped[list[str]] = mapped_column(
+        JSON,
+        nullable=False,
+    )
+
+    side_effects: Mapped[list[str]] = mapped_column(
+        JSON,
+        nullable=False,
+    )
+
+    unclassified_text: Mapped[list[str]] = mapped_column(
+        JSON,
+        nullable=False,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
 
 
 engine: Engine = create_engine(
@@ -38,11 +140,8 @@ def verify_database_connection() -> None:
 
 
 def create_database() -> None:
-    """SQLiteファイルと定義済みテーブルを作成する。
+    """SQLiteファイルと定義済みORMテーブルを作成する。"""
 
-    現段階ではORMモデルが未定義のため、SQLiteファイルの作成と
-    接続基盤の初期化が主な役割となる。
-    """
     verify_database_connection()
     Base.metadata.create_all(bind=engine)
 
@@ -67,13 +166,8 @@ def dispose_database() -> None:
 
 
 def is_database_available() -> bool:
-    """SQLiteへ接続可能かを真偽値で返す。
+    """SQLiteへ接続可能かを真偽値で返す。"""
 
-    Step 6のヘルスチェックAPIから利用する想定。
-
-    Returns:
-        bool: 接続確認に成功した場合はTrue、失敗した場合はFalse。
-    """
     try:
         verify_database_connection()
     except SQLAlchemyError:

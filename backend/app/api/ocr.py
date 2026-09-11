@@ -9,7 +9,15 @@ import urllib.request
 from typing import Annotated, Final, Literal, cast
 from uuid import uuid4
 
-from fastapi import APIRouter, File, HTTPException, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    HTTPException,
+    UploadFile,
+    status,
+)
+
 from google import genai
 from google.genai import errors, types
 from PIL import (
@@ -19,12 +27,20 @@ from PIL import (
     ImageOps,
     UnidentifiedImageError,
 )
+
 from pydantic import ValidationError
 
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.orm import Session
+
 from app.config import settings
+from app.database import OcrCorrection, get_session
+
 from app.schemas.common import (
     GeminiStructuredOcrResponse,
     ImageUploadResponse,
+    OcrCorrectionCreateRequest,
+    OcrCorrectionCreateResponse,
     OcrResultResponse,
 )
 
@@ -933,4 +949,78 @@ async def upload_ocr_image(
             quality_status="review_required",
             structured_data=structured_data,
         ),
+    )
+@router.post(
+    "/corrections",
+    response_model=OcrCorrectionCreateResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="修正済みOCR結果をSQLiteへ保存する",
+)
+def save_ocr_correction(
+    correction: OcrCorrectionCreateRequest,
+    database_session: Annotated[
+        Session,
+        Depends(get_session),
+    ],
+) -> OcrCorrectionCreateResponse:
+    """利用者が確認・修正したOCR結果を保存する。"""
+
+    database_record = OcrCorrection(
+        upload_id=correction.upload_id,
+        raw_text=correction.raw_text,
+        medicine_name=correction.medicine_name,
+        timing_original_text=(
+            correction.timing_original_text
+        ),
+        times_per_day=correction.times_per_day,
+        tablets_per_dose=correction.tablets_per_dose,
+        number_of_days=correction.number_of_days,
+        dosage_original_text=(
+            correction.dosage_original_text
+        ),
+        medicine_information=(
+            correction.medicine_information
+        ),
+        precautions=correction.precautions,
+        interactions=correction.interactions,
+        side_effects=correction.side_effects,
+        unclassified_text=correction.unclassified_text,
+    )
+
+    try:
+        database_session.add(database_record)
+        database_session.commit()
+        database_session.refresh(database_record)
+
+    except IntegrityError as error:
+        database_session.rollback()
+
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "code": "OCR_CORRECTION_ALREADY_EXISTS",
+                "message": (
+                    "このOCR結果は既に保存されています。"
+                ),
+            },
+        ) from error
+
+    except SQLAlchemyError as error:
+        database_session.rollback()
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "code": "OCR_CORRECTION_SAVE_FAILED",
+                "message": (
+                    "OCR修正結果を保存できませんでした。"
+                ),
+            },
+        ) from error
+
+    return OcrCorrectionCreateResponse(
+        status="saved",
+        correction_id=database_record.id,
+        upload_id=database_record.upload_id,
+        message="OCR correction saved successfully",
     )

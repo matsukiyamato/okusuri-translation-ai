@@ -61,6 +61,29 @@ type FieldSectionProps = {
   onChangeText: (value: string) => void;
 };
 
+type OcrCorrectionCreateRequest = {
+  upload_id: string;
+  raw_text: string;
+  medicine_name: string | null;
+  timing_original_text: string | null;
+  times_per_day: number | null;
+  tablets_per_dose: number | null;
+  number_of_days: number | null;
+  dosage_original_text: string | null;
+  medicine_information: string[];
+  precautions: string[];
+  interactions: string[];
+  side_effects: string[];
+  unclassified_text: string[];
+};
+
+type OcrCorrectionCreateResponse = {
+  status: 'saved';
+  correction_id: number;
+  upload_id: string;
+  message: string;
+};
+
 type ActionButtonProps = {
   accessibilityLabel: string;
   iconName: MaterialIconName;
@@ -108,6 +131,68 @@ const COLORS = {
   shadow: '#000000',
   transparent: 'transparent',
 } as const;
+
+const toNullableString = (
+  value: string,
+): string | null => {
+  const normalizedValue: string = value.trim();
+
+  return normalizedValue.length > 0
+    ? normalizedValue
+    : null;
+};
+
+const toStringArray = (
+  value: string,
+): string[] =>
+  value
+    .split('\n')
+    .map(
+      (item: string): string =>
+        item.trim(),
+    )
+    .filter(
+      (item: string): boolean =>
+        item.length > 0,
+    );
+
+const toNullablePositiveNumber = (
+  value: string,
+): number | null => {
+  const normalizedValue: string = value.trim();
+
+  if (normalizedValue.length === 0) {
+    return null;
+  }
+
+  const numericValue: number =
+    Number(normalizedValue);
+
+  if (
+    !Number.isFinite(numericValue) ||
+    numericValue <= 0
+  ) {
+    return null;
+  }
+
+  return numericValue;
+};
+
+const toNullablePositiveInteger = (
+  value: string,
+): number | null => {
+  const numericValue: number | null =
+    toNullablePositiveNumber(value);
+
+  if (
+    numericValue === null ||
+    !Number.isInteger(numericValue)
+  ) {
+    return null;
+  }
+
+  return numericValue;
+};
 
 /**
  * 上部ヘッダーで使用するアイコンボタン。
@@ -379,6 +464,12 @@ const OcrVerificationScreen = ({
   const requiresUserReview: boolean =
     structuredData?.requires_user_review ?? true;
 
+  const [isSaving, setIsSaving] =
+    useState<boolean>(false);
+
+  const [saveError, setSaveError] =
+    useState<string | null>(null);
+
   const [previewHeight, setPreviewHeight] =
     useState<number>(0);
 
@@ -465,42 +556,145 @@ const OcrVerificationScreen = ({
     ]);
 
   const handleConfirm =
-    useCallback((): void => {
-      const normalizedMedicineName =
-        medicineName.trim();
+  useCallback(async (): Promise<void> => {
+    const normalizedMedicineName: string =
+      medicineName.trim();
 
-      if (
-        normalizedMedicineName.length === 0
-      ) {
-        return;
-      }
+    if (
+      normalizedMedicineName.length === 0 ||
+      isSaving
+    ) {
+      return;
+    }
 
-      if (
-        displayMode === 'textAudio'
-      ) {
-        navigation.navigate(
-          'TextAudioResult',
+    const requestBody: OcrCorrectionCreateRequest = {
+      upload_id:
+        uploadResult.upload_id,
+
+      raw_text:
+        uploadResult.ocr_result.raw_text,
+
+      medicine_name:
+        normalizedMedicineName,
+
+      timing_original_text:
+        toNullableString(timingText),
+
+      times_per_day:
+        toNullablePositiveInteger(
+          timesPerDay,
+        ),
+
+      tablets_per_dose:
+        toNullablePositiveNumber(
+          tabletsPerDose,
+        ),
+
+      number_of_days:
+        toNullablePositiveInteger(
+          numberOfDays,
+        ),
+
+      dosage_original_text:
+        toNullableString(dosage),
+
+      medicine_information:
+        toStringArray(
+          medicineInformation,
+        ),
+
+      precautions:
+        toStringArray(
+          precautions,
+        ),
+
+      interactions:
+        toStringArray(
+          interactions,
+        ),
+
+      side_effects:
+        toStringArray(
+          sideEffects,
+        ),
+
+      unclassified_text:
+        toStringArray(
+          unclassifiedText,
+        ),
+    };
+
+    setIsSaving(true);
+    setSaveError(null);
+
+    try {
+      const response: Response =
+        await fetch(
+          'http://127.0.0.1:8000/api/ocr/corrections',
           {
-            recognizedText:
-              normalizedMedicineName,
+            method: 'POST',
+            headers: {
+              'Content-Type':
+                'application/json',
+            },
+            body: JSON.stringify(
+              requestBody,
+            ),
           },
         );
 
-        return;
+      if (!response.ok) {
+        throw new Error(
+          `OCR correction save failed: ${response.status}`,
+        );
       }
 
-      navigation.navigate(
-        'SignLanguageResult',
-        {
-          recognizedText:
-            normalizedMedicineName,
-        },
+      const savedResult =
+        (await response.json()) as
+          OcrCorrectionCreateResponse;
+
+      if (
+        savedResult.status !== 'saved'
+      ) {
+        throw new Error(
+          'Unexpected save response.',
+        );
+      }
+
+      console.log(
+        'OCR correction saved:',
+        savedResult,
       );
-    }, [
-      displayMode,
-      medicineName,
-      navigation,
-    ]);
+
+      // Step 13でここに
+      // TextAudioResultScreenへの
+      // navigation.navigate()を追加する
+
+    } catch (error: unknown) {
+      const errorMessage: string =
+        error instanceof Error
+          ? error.message
+          : 'OCR修正結果の保存に失敗しました。';
+
+      setSaveError(errorMessage);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [
+    dosage,
+    interactions,
+    isSaving,
+    medicineInformation,
+    medicineName,
+    numberOfDays,
+    precautions,
+    sideEffects,
+    tabletsPerDose,
+    timesPerDay,
+    timingText,
+    unclassifiedText,
+    uploadResult,
+  ]);
 
   const scanTranslateY =
     scanProgress.interpolate({
@@ -944,7 +1138,7 @@ const OcrVerificationScreen = ({
                     </View>
                   </View>
 
-                    <View style={styles.fieldList}>
+                    <View style={styles.fieldList}></View>
                 <FieldSection
                   label="お薬名"
                   onChangeText={setMedicineName}
@@ -1020,8 +1214,7 @@ const OcrVerificationScreen = ({
                   placeholder="読み取れなかった場合は空欄"
                   value={sideEffects}
                 />
-              </View>
-
+              
                 <FieldSection
                   label="分類できなかった文章"
                   multiline
