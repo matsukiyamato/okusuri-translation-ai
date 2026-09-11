@@ -236,3 +236,64 @@ class ImageUploadResponse(BaseModel):
     size_bytes: int
     message: str
     ocr_result: OcrResultResponse
+
+class OcrCorrectionCreateRequest(BaseModel):
+    """利用者が確認・修正したOCR結果の保存要求。"""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        frozen=True,
+    )
+
+    upload_id: str = Field(min_length=1)
+    raw_text: str
+
+    medicine_name: str | None = None
+    timing_original_text: str | None = None
+
+    times_per_day: int | None = Field(
+        default=None,
+        ge=1,
+    )
+
+    tablets_per_dose: float | None = Field(
+        default=None,
+        gt=0,
+    )
+
+    number_of_days: int | None = Field(
+        default=None,
+        ge=1,
+    )
+
+    dosage_original_text: str | None = None
+
+    medicine_information: list[str] = Field(
+        default_factory=list,
+    )
+    precautions: list[str] = Field(
+        default_factory=list,
+    )
+    interactions: list[str] = Field(
+        default_factory=list,
+    )
+    side_effects: list[str] = Field(
+        default_factory=list,
+    )
+    unclassified_text: list[str] = Field(
+        default_factory=list,
+    )
+
+
+class OcrCorrectionCreateResponse(BaseModel):
+    """OCR修正結果の保存レスポンス。"""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        frozen=True,
+    )
+
+    status: Literal["saved"]
+    correction_id: int
+    upload_id: str
+    message: str
