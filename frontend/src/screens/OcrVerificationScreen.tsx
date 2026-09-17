@@ -666,9 +666,60 @@ const OcrVerificationScreen = ({
         savedResult,
       );
 
-      // Step 13でここに
-      // TextAudioResultScreenへの
-      // navigation.navigate()を追加する
+    /**
+ * Step 13:
+ * SQLiteへの保存が正常に完了した場合のみ、
+ * 利用者が確認・修正したOCR結果を
+ * TextAudioResultScreenへ渡す。
+ */
+navigation.navigate(
+  'TextAudioResult',
+  {
+    correctedResult: {
+      // SQLite側で発行された修正データID
+      correction_id:
+        savedResult.correction_id,
+
+      // 元のOCRアップロードを識別するID
+      upload_id:
+        savedResult.upload_id,
+
+      // 利用者が確認・修正した値をそのまま渡す
+      medicine_name:
+        requestBody.medicine_name,
+
+      timing_original_text:
+        requestBody.timing_original_text,
+
+      times_per_day:
+        requestBody.times_per_day,
+
+      tablets_per_dose:
+        requestBody.tablets_per_dose,
+
+      number_of_days:
+        requestBody.number_of_days,
+
+      dosage_original_text:
+        requestBody.dosage_original_text,
+
+      medicine_information:
+        requestBody.medicine_information,
+
+      precautions:
+        requestBody.precautions,
+
+      interactions:
+        requestBody.interactions,
+
+      side_effects:
+        requestBody.side_effects,
+
+      unclassified_text:
+        requestBody.unclassified_text,
+    },
+  },
+);
 
     } catch (error: unknown) {
       const errorMessage: string =
@@ -686,6 +737,7 @@ const OcrVerificationScreen = ({
     isSaving,
     medicineInformation,
     medicineName,
+    navigation,
     numberOfDays,
     precautions,
     sideEffects,
@@ -1340,21 +1392,38 @@ const OcrVerificationScreen = ({
 
                   <ActionButton
                     accessibilityLabel={
-                      displayMode ===
+                    displayMode ===
                       'textAudio'
                         ? 'テキスト音声結果を表示する'
                         : '手話動画結果を表示する'
                     }
+
+                    /**
+                     * お薬名が未入力、またはSQLite保存中の場合は
+                     * ボタン操作を無効化する。
+                     *
+                     * 保存中に再度押されて
+                     * 同じデータを二重POSTすることを防ぐ。
+                     */
                     disabled={
-                      isConfirmDisabled
+                      isConfirmDisabled ||
+                      isSaving
                     }
+
                     iconName="check-circle"
+
+                    /**
+                     * 保存処理中であることを
+                     * 利用者にも分かるように表示する。
+                     */
                     label={
-                      displayMode ===
-                      'textAudio'
-                        ? 'テキスト・音声結果へ'
-                        : '手話動画結果へ'
+                      isSaving
+                        ? '保存中...'
+                        : displayMode === 'textAudio'
+                          ? 'テキスト・音声結果へ'
+                          : '手話動画結果へ'
                     }
+
                     onPress={handleConfirm}
                     variant="filled"
                   />

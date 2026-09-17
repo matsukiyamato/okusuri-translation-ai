@@ -90,19 +90,60 @@ export type ImageUploadResult = {
 };
 
 /**
+ * OcrVerificationScreenで利用者が確認・修正したデータ。
+ *
+ * 医療的な情報を新規生成するものではなく、
+ * OCR結果を利用者が確認した値のみを保持する。
+ */
+export type CorrectedOcrResult = {
+  correction_id: number;
+  upload_id: string;
+
+  medicine_name: string | null;
+  timing_original_text: string | null;
+
+  times_per_day: number | null;
+  tablets_per_dose: number | null;
+  number_of_days: number | null;
+
+  dosage_original_text: string | null;
+
+  medicine_information: string[];
+  precautions: string[];
+  interactions: string[];
+  side_effects: string[];
+  unclassified_text: string[];
+};
+
+/**
  * ModeSelectionScreen.tsxで定義されている既存の画面遷移型を維持しつつ、
  * OcrVerification画面に画像アップロード結果を追加する。
  */
 export type RootStackParamList =
   Omit<
     BaseRootStackParamList,
-    'OcrVerification'
+    'OcrVerification' | 'TextAudioResult'
   > & {
+    /**
+     * OCR確認画面。
+     *
+     * 撮影画像をFastAPIへ送信した結果を受け取る。
+     */
     OcrVerification:
       BaseRootStackParamList['OcrVerification'] & {
         uploadResult: ImageUploadResult;
       };
+
+    /**
+     * Step 13:
+     * SQLiteへの保存完了後、
+     * 利用者が確認・修正したOCR結果を受け取る。
+     */
+    TextAudioResult: {
+      correctedResult: CorrectedOcrResult;
+    };
   };
+
 
 /**
  * 既存画面との互換性維持。

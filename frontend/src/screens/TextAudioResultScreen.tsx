@@ -35,7 +35,7 @@ import type {
 
 import type {
   RootStackParamList,
-} from './ModeSelectionScreen';
+} from '../navigation/AppNavigator';
 
 type TextAudioResultScreenProps =
   NativeStackScreenProps<
@@ -389,8 +389,14 @@ const TextAudioResultScreen = ({
   const isDesktopLayout =
     width >= DESKTOP_BREAKPOINT;
 
-  const recognizedText: string =
-    route.params?.recognizedText?.trim() ?? '';
+  /**
+ * Step 13:
+ * OcrVerificationScreenから受け取った
+ * 利用者確認済みOCR結果を取得する。
+ */
+  const {
+    correctedResult,    
+  } = route.params;
 
   /**
    * FastAPI接続前の仮データ。
@@ -399,24 +405,24 @@ const TextAudioResultScreen = ({
    * TranslationResult型へ変換して使用します。
    */
   const translationResult =
-    useMemo<TranslationResult>(
-      (): TranslationResult => ({
-        medicineName:
-          recognizedText.length > 0
-            ? recognizedText
-            : '読み取ったお薬名',
+  useMemo<TranslationResult>(
+    (): TranslationResult => ({
+      medicineName:
+        correctedResult.medicine_name ?? '',
 
-        effectiveness:
-          '読み取った説明書の内容を、分かりやすい文章で表示します。',
+      effectiveness:
+        correctedResult.medicine_information.join(
+          '\n',
+        ),
 
-        dosage:
-          '読み取った説明書に記載されている使用方法を表示します。',
+      dosage:
+        correctedResult.dosage_original_text ?? '',
 
-        source:
-          '現在は画面遷移確認用の仮データです。FastAPI接続後に参照元情報を表示します。',
-      }),
-      [recognizedText],
-    );
+      source:
+        'OCR読み取り・利用者確認済みデータ',
+    }),
+    [correctedResult],
+  );
 
   const [playbackStatus, setPlaybackStatus] =
     useState<AudioPlaybackStatus>('idle');
